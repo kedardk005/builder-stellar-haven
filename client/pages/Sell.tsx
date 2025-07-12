@@ -432,15 +432,35 @@ const Sell = () => {
                         <div className="flex space-x-4 pt-4">
                           <Button
                             type="submit"
+                            disabled={isSubmitting || !isAuthenticated}
                             className="flex-1 bg-primary hover:bg-hover"
                           >
-                            <Package className="h-4 w-4 mr-2" />
-                            List Item
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Listing Item...
+                              </>
+                            ) : (
+                              <>
+                                <Package className="h-4 w-4 mr-2" />
+                                List Item
+                              </>
+                            )}
                           </Button>
-                          <Button variant="outline" className="px-6">
-                            Available/Swap
+                          <Button
+                            variant="outline"
+                            className="px-6"
+                            disabled={isSubmitting}
+                          >
+                            Save Draft
                           </Button>
                         </div>
+
+                        {!isAuthenticated && (
+                          <p className="text-sm text-text-muted mt-2">
+                            Please log in to list an item.
+                          </p>
+                        )}
                       </form>
                     </div>
                   </div>
