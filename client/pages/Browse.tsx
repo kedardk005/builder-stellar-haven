@@ -701,24 +701,66 @@ const Browse = () => {
                               </Badge>
                             )}
                           </div>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-semibold text-foreground">
-                                ₹{item.price}
+                          <div className="space-y-3">
+                            {/* Exchange Methods */}
+                            <div className="space-y-2">
+                              <div className="text-xs font-medium text-text-secondary">
+                                Get this item:
                               </div>
-                              <div className="text-xs text-text-muted flex items-center">
-                                <Recycle className="h-3 w-3 mr-1" />
-                                {item.points ||
-                                  Math.floor(item.price * 0.1)}{" "}
-                                pts
-                              </div>
+
+                              {/* Swap Option */}
+                              {item.swapEnabled !== false && (
+                                <div className="flex items-center justify-between text-xs bg-surface p-2 rounded">
+                                  <div className="flex items-center gap-1">
+                                    <ArrowRightLeft className="h-3 w-3 text-blue-500" />
+                                    <span>Swap</span>
+                                  </div>
+                                  <span className="text-blue-500 font-medium">
+                                    Available
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Points Option */}
+                              {item.pointsEnabled !== false && (
+                                <div className="flex items-center justify-between text-xs bg-surface p-2 rounded">
+                                  <div className="flex items-center gap-1">
+                                    <Coins className="h-3 w-3 text-green-500" />
+                                    <span>Points</span>
+                                  </div>
+                                  <span className="text-green-500 font-medium">
+                                    {item.pointsValue || 3} pts
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Purchase Option */}
+                              {item.purchaseEnabled !== false && (
+                                <div className="flex items-center justify-between text-xs bg-surface p-2 rounded">
+                                  <div className="flex items-center gap-1">
+                                    <CreditCard className="h-3 w-3 text-purple-500" />
+                                    <span>Buy</span>
+                                  </div>
+                                  <span className="text-purple-500 font-medium">
+                                    ₹{item.price}
+                                  </span>
+                                </div>
+                              )}
                             </div>
-                            <Badge
-                              variant="outline"
-                              className="text-xs text-primary border-primary"
-                            >
-                              {item.condition}
-                            </Badge>
+
+                            <div className="flex items-center justify-between">
+                              <Badge
+                                variant="outline"
+                                className="text-xs text-primary border-primary"
+                              >
+                                {item.condition}
+                              </Badge>
+                              {item.qualityBadge === "premium" && (
+                                <Badge className="text-xs bg-yellow-500">
+                                  Premium
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </CardContent>
