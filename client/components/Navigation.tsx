@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { ProtectedButton } from "@/components/AuthGuard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -18,6 +20,7 @@ import { cn } from "@/lib/utils";
 export const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const navItems = [
     { label: "Browse", href: "/browse", icon: ShoppingBag },
@@ -92,23 +95,71 @@ export const Navigation = () => {
               <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full"></span>
             </Button>
 
-            {/* Auth Buttons for New Users */}
-            <div className="hidden md:flex items-center space-x-2">
-              <Link to="/login">
+            {/* User Actions */}
+            {isAuthenticated ? (
+              <div className="hidden md:flex items-center space-x-3">
+                {/* Points Badge */}
+                <Badge
+                  variant="secondary"
+                  className="bg-surface text-text-secondary"
+                >
+                  <Recycle className="h-3 w-3 mr-1" />
+                  {user?.points || 0} pts
+                </Badge>
+
+                {/* Notifications */}
+                <Button variant="ghost" size="sm" className="relative">
+                  <Bell className="h-4 w-4" />
+                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full"></span>
+                </Button>
+
+                {/* Profile */}
+                <Link to="/dashboard">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center space-x-2"
+                  >
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={user?.avatar} />
+                      <AvatarFallback className="text-xs">
+                        {user?.name
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("") || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">{user?.name}</span>
+                  </Button>
+                </Link>
+
                 <Button
                   variant="ghost"
                   size="sm"
+                  onClick={logout}
                   className="text-text-secondary hover:text-foreground"
                 >
-                  Sign In
+                  Logout
                 </Button>
-              </Link>
-              <Link to="/register">
-                <Button size="sm" className="bg-primary hover:bg-hover">
-                  Sign Up
-                </Button>
-              </Link>
-            </div>
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center space-x-2">
+                <Link to="/login">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-text-secondary hover:text-foreground"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button size="sm" className="bg-primary hover:bg-hover">
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+            )}
 
             {/* Mobile Menu Toggle */}
             <Button
@@ -142,16 +193,44 @@ export const Navigation = () => {
         {isMenuOpen && (
           <div className="md:hidden border-t border-border py-4">
             <div className="space-y-3">
-              {/* Points */}
-              <div className="flex items-center justify-between px-2">
-                <span className="text-sm text-text-secondary">
-                  ReWear Points
-                </span>
-                <Badge variant="secondary" className="bg-surface">
-                  <Recycle className="h-3 w-3 mr-1" />
-                  125 pts
-                </Badge>
-              </div>
+              {/* User Info or Auth Prompt */}
+              {isAuthenticated ? (
+                <div className="flex items-center justify-between px-2">
+                  <span className="text-sm text-text-secondary">
+                    ReWear Points
+                  </span>
+                  <Badge variant="secondary" className="bg-surface">
+                    <Recycle className="h-3 w-3 mr-1" />
+                    {user?.points || 0} pts
+                  </Badge>
+                </div>
+              ) : (
+                <div className="px-2 py-3 bg-surface rounded-lg">
+                  <p className="text-sm text-text-secondary mb-2">
+                    Sign in to earn points and access all features
+                  </p>
+                  <div className="flex space-x-2">
+                    <Link
+                      to="/login"
+                      className="flex-1"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Button variant="outline" size="sm" className="w-full">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="flex-1"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Button size="sm" className="w-full">
+                        Sign Up
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
 
               {/* Navigation Items */}
               {navItems.map((item) => {
@@ -174,23 +253,48 @@ export const Navigation = () => {
                 );
               })}
 
-              {/* Auth Links for Mobile */}
-              <Link
-                to="/login"
-                className="flex items-center space-x-3 px-2 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface hover:text-foreground transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <User className="h-5 w-5" />
-                <span>Sign In</span>
-              </Link>
-              <Link
-                to="/register"
-                className="flex items-center space-x-3 px-2 py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-hover transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <User className="h-5 w-5" />
-                <span>Sign Up</span>
-              </Link>
+              {/* Profile/Auth Links for Mobile */}
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="flex items-center space-x-3 px-2 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface hover:text-foreground transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User className="h-5 w-5" />
+                    <span>Dashboard</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex items-center space-x-3 px-2 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface hover:text-foreground transition-colors w-full text-left"
+                  >
+                    <User className="h-5 w-5" />
+                    <span>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="flex items-center space-x-3 px-2 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface hover:text-foreground transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User className="h-5 w-5" />
+                    <span>Sign In</span>
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="flex items-center space-x-3 px-2 py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-hover transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User className="h-5 w-5" />
+                    <span>Sign Up</span>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
