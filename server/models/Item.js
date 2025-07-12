@@ -111,9 +111,43 @@ const itemSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "sold", "reserved", "draft", "inactive"],
-      default: "active",
+      enum: [
+        "pending",
+        "approved",
+        "rejected",
+        "active",
+        "sold",
+        "reserved",
+        "draft",
+        "inactive",
+        "flagged",
+      ],
+      default: "pending",
     },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    approvedAt: Date,
+    rejectedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    rejectedAt: Date,
+    rejectionReason: String,
+    flaggedBy: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        reason: String,
+        flaggedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     isPromoted: {
       type: Boolean,
       default: false,
@@ -286,6 +320,53 @@ itemSchema.methods.markAsSold = function (buyerId) {
   this.reservedBy = undefined;
   this.reservedUntil = undefined;
   return this.save();
+};
+
+// Approve item
+itemSchema.methods.approveItem = function (adminId, qualityBadge) {
+  this.status = "approved";
+  this.approvedBy = adminId;
+  this.approvedAt = new Date();
+  if (qualityBadge) {
+    this.qualityBadge = qualityBadge;
+  }
+  return this.save();
+};
+
+// Reject item
+itemSchema.methods.rejectItem = function (adminId, reason) {
+  this.status = "rejected";
+  this.rejectedBy = adminId;
+  this.rejectedAt = new Date();
+  this.rejectionReason = reason;
+  return this.save();
+};
+
+// Flag item
+itemSchema.methods.flagItem = function (userId, reason) {
+  const existingFlag = this.flaggedBy.find(
+    (flag) => flag.user.toString() === userId.toString(),
+  );
+  if (!existingFlag) {
+    this.flaggedBy.push({
+      user: userId,
+      reason: reason,
+      flaggedAt: new Date(),
+    });
+    if (this.flaggedBy.length >= 3) {
+      this.status = "flagged";
+    }
+  }
+  return this.save();
+};
+
+// Activate approved item
+itemSchema.methods.activateItem = function () {
+  if (this.status === "approved") {
+    this.status = "active";
+    return this.save();
+  }
+  throw new Error("Item must be approved before activation");
 };
 
 // Reserve item

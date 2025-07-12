@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { AuthGuard, ProtectedButton } from "@/components/AuthGuard";
 import { useAuth } from "@/contexts/AuthContext";
+import { itemsApi, ApiError } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 import {
   Filter,
   Search,
@@ -28,13 +31,69 @@ import {
   ShoppingBag,
   Users,
   Sparkles,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+interface Item {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  brand: string;
+  size: string;
+  color: string;
+  condition: string;
+  price: number;
+  originalPrice?: number;
+  images: Array<{ url: string; isPrimary: boolean }>;
+  seller: {
+    _id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+    rating: { average: number; count: number };
+  };
+  status: string;
+  qualityBadge: "basic" | "medium" | "high" | "premium";
+  views: number;
+  likes: number;
+  likedBy: string[];
+  featured: boolean;
+  createdAt: string;
+  tags?: string[];
+  isLiked?: boolean;
+  points?: number;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data: Item[];
+  pagination?: {
+    current: number;
+    pages: number;
+    total: number;
+    limit: number;
+  };
+}
+
 const Browse = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCondition, setSelectedCondition] = useState("");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Auto-changing banner images
   const bannerImages = [
@@ -65,105 +124,97 @@ const Browse = () => {
     return () => clearInterval(interval);
   }, [bannerImages.length]);
 
-  // Mock data for demonstration
-  const items = [
-    {
-      id: 1,
-      title: "Vintage Denim Jacket",
-      brand: "Levi's",
-      size: "M",
-      condition: "Excellent",
-      price: 450,
-      points: 25,
-      image:
-        "https://images.unsplash.com/photo-1544966503-7ba9043d5ada?w=400&h=400&fit=crop",
-      tags: ["Vintage", "Denim", "Casual"],
-      rating: 4.8,
-      seller: "FashionLover23",
-      isLiked: false,
-      quality: "high",
-    },
-    {
-      id: 2,
-      title: "Summer Floral Dress",
-      brand: "Zara",
-      size: "S",
-      condition: "Good",
-      price: 280,
-      points: 18,
-      image:
-        "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&h=400&fit=crop",
-      tags: ["Summer", "Floral", "Dress"],
-      rating: 4.5,
-      seller: "StyleGuru",
-      isLiked: true,
-      quality: "medium",
-    },
-    {
-      id: 3,
-      title: "Designer Leather Bag",
-      brand: "Coach",
-      size: "One Size",
-      condition: "Like New",
-      price: 1200,
-      points: 65,
-      image:
-        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",
-      tags: ["Designer", "Leather", "Accessories"],
-      rating: 5.0,
-      seller: "LuxuryCloset",
-      isLiked: false,
-      quality: "premium",
-    },
-    {
-      id: 4,
-      title: "Casual White Sneakers",
-      brand: "Adidas",
-      size: "9",
-      condition: "Good",
-      price: 320,
-      points: 20,
-      image:
-        "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop",
-      tags: ["Sneakers", "Casual", "Sports"],
-      rating: 4.2,
-      seller: "SneakerHead",
-      isLiked: false,
-      quality: "medium",
-    },
-    {
-      id: 5,
-      title: "Wool Winter Coat",
-      brand: "H&M",
-      size: "L",
-      condition: "Excellent",
-      price: 380,
-      points: 22,
-      image:
-        "https://images.unsplash.com/photo-1544441893-675973e31985?w=400&h=400&fit=crop",
-      tags: ["Winter", "Wool", "Coat"],
-      rating: 4.6,
-      seller: "WinterWardrobe",
-      isLiked: true,
-      quality: "high",
-    },
-    {
-      id: 6,
-      title: "Silk Formal Shirt",
-      brand: "Ralph Lauren",
-      size: "M",
-      condition: "Like New",
-      price: 650,
-      points: 35,
-      image:
-        "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400&h=400&fit=crop",
-      tags: ["Formal", "Silk", "Business"],
-      rating: 4.9,
-      seller: "ProfessionalStyle",
-      isLiked: false,
-      quality: "premium",
-    },
-  ];
+  // Fetch items from API
+  const fetchItems = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params: any = {
+        page: currentPage,
+        limit: 12,
+        sortBy,
+        sortOrder,
+      };
+
+      if (searchTerm) params.search = searchTerm;
+      if (selectedCategory && selectedCategory !== "All Categories") {
+        params.category = selectedCategory;
+      }
+      if (selectedCondition) params.condition = selectedCondition;
+
+      const response: ApiResponse = await itemsApi.getItems(params);
+
+      if (response.success) {
+        const itemsWithCalculatedData = response.data.map((item) => ({
+          ...item,
+          points: Math.floor(item.price * 0.1), // Calculate points as 10% of price
+          isLiked: user ? item.likedBy?.includes(user.id) : false,
+        }));
+
+        setItems(itemsWithCalculatedData);
+        setTotalItems(response.pagination?.total || 0);
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof ApiError ? err.message : "Failed to fetch items";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch items on component mount and when filters change
+  useEffect(() => {
+    fetchItems();
+  }, [
+    currentPage,
+    searchTerm,
+    selectedCategory,
+    selectedCondition,
+    sortBy,
+    sortOrder,
+  ]);
+
+  // Handle like/unlike item
+  const handleLikeItem = async (itemId: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to like items",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await itemsApi.likeItem(itemId);
+
+      // Update the item in the local state
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item._id === itemId
+            ? {
+                ...item,
+                isLiked: !item.isLiked,
+                likes: item.isLiked ? item.likes - 1 : item.likes + 1,
+              }
+            : item,
+        ),
+      );
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to update like status",
+        variant: "destructive",
+      });
+    }
+  };
 
   const categories = [
     "All Categories",
@@ -280,6 +331,11 @@ const Browse = () => {
                 type="text"
                 placeholder="Search for items, brands, or sellers..."
                 className="pl-10"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // Reset to first page when searching
+                }}
               />
             </div>
           </div>
@@ -292,16 +348,24 @@ const Browse = () => {
               <SlidersHorizontal className="h-4 w-4" />
               Filters
             </Button>
-            <Select defaultValue="newest">
+            <Select
+              value={`${sortBy}-${sortOrder}`}
+              onValueChange={(value) => {
+                const [field, order] = value.split("-");
+                setSortBy(field);
+                setSortOrder(order);
+                setCurrentPage(1);
+              }}
+            >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-                <SelectItem value="points-low">Points: Low to High</SelectItem>
-                <SelectItem value="popular">Most Popular</SelectItem>
+                <SelectItem value="createdAt-desc">Newest</SelectItem>
+                <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                <SelectItem value="views-desc">Most Popular</SelectItem>
+                <SelectItem value="likes-desc">Most Liked</SelectItem>
               </SelectContent>
             </Select>
             <div className="flex border border-border rounded-lg">
@@ -336,7 +400,11 @@ const Browse = () => {
             <CardContent className="p-4 text-center">
               <ShoppingBag className="h-6 w-6 text-primary mx-auto mb-2" />
               <div className="text-2xl font-bold text-foreground">
-                {items.length}
+                {loading ? (
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                ) : (
+                  totalItems
+                )}
               </div>
               <div className="text-xs text-text-muted">Items Available</div>
             </CardContent>
@@ -381,7 +449,24 @@ const Browse = () => {
                 <div className="space-y-2">
                   {categories.map((category) => (
                     <div key={category} className="flex items-center space-x-2">
-                      <Checkbox id={category} />
+                      <Checkbox
+                        id={category}
+                        checked={
+                          selectedCategory === category ||
+                          (category === "All Categories" && !selectedCategory)
+                        }
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedCategory(
+                              category === "All Categories" ? "" : category,
+                            );
+                            setCurrentPage(1);
+                          } else {
+                            setSelectedCategory("");
+                            setCurrentPage(1);
+                          }
+                        }}
+                      />
                       <Label
                         htmlFor={category}
                         className="text-sm cursor-pointer"
@@ -421,7 +506,19 @@ const Browse = () => {
                       key={condition}
                       className="flex items-center space-x-2"
                     >
-                      <Checkbox id={condition} />
+                      <Checkbox
+                        id={condition}
+                        checked={selectedCondition === condition}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedCondition(condition);
+                            setCurrentPage(1);
+                          } else {
+                            setSelectedCondition("");
+                            setCurrentPage(1);
+                          }
+                        }}
+                      />
                       <Label
                         htmlFor={condition}
                         className="text-sm cursor-pointer"
@@ -471,11 +568,39 @@ const Browse = () => {
           <div className="flex-1">
             <div className="mb-4 flex items-center justify-between">
               <p className="text-text-secondary">
-                Showing {items.length} of {items.length} items
+                {loading
+                  ? "Loading..."
+                  : `Showing ${items.length} of ${totalItems} items`}
               </p>
+              {error && (
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-sm">{error}</span>
+                </div>
+              )}
             </div>
 
-            {viewMode === "grid" ? (
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <span className="ml-2">Loading items...</span>
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+                <h3 className="text-lg font-semibold">Failed to load items</h3>
+                <p className="text-text-muted mb-4">{error}</p>
+                <Button onClick={fetchItems}>Try Again</Button>
+              </div>
+            ) : items.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <ShoppingBag className="h-12 w-12 text-text-muted mb-4" />
+                <h3 className="text-lg font-semibold">No items found</h3>
+                <p className="text-text-muted">
+                  Try adjusting your search or filters
+                </p>
+              </div>
+            ) : viewMode === "grid" ? (
               <motion.div
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 initial={{ opacity: 0 }}
@@ -484,19 +609,26 @@ const Browse = () => {
               >
                 {items.map((item, index) => (
                   <motion.div
-                    key={item.id}
+                    key={item._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index }}
                   >
-                    <Card className="border-border hover:shadow-lg transition-shadow cursor-pointer group">
+                    <Card
+                      className="border-border hover:shadow-lg transition-shadow cursor-pointer group"
+                      onClick={() => navigate(`/product/${item._id}`)}
+                    >
                       <CardContent className="p-0">
                         <div className="relative">
                           <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
                             <img
-                              src={item.image}
+                              src={item.images?.[0]?.url || "/placeholder.svg"}
                               alt={item.title}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  "/placeholder.svg";
+                              }}
                             />
                           </div>
                           <AuthGuard feature="wishlist">
@@ -504,6 +636,10 @@ const Browse = () => {
                               variant="ghost"
                               size="sm"
                               className="absolute top-2 right-2 bg-background/80 hover:bg-background"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLikeItem(item._id);
+                              }}
                             >
                               <Heart
                                 className={cn(
@@ -515,12 +651,12 @@ const Browse = () => {
                               />
                             </Button>
                           </AuthGuard>
-                          {item.quality === "premium" && (
+                          {item.qualityBadge === "premium" && (
                             <Badge className="absolute top-2 left-2 bg-primary">
                               Premium
                             </Badge>
                           )}
-                          {item.quality === "high" && (
+                          {item.qualityBadge === "high" && (
                             <Badge className="absolute top-2 left-2 bg-yellow-500">
                               High Quality
                             </Badge>
@@ -538,11 +674,12 @@ const Browse = () => {
                           <div className="flex items-center space-x-1">
                             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                             <span className="text-xs text-text-secondary">
-                              {item.rating} • by {item.seller}
+                              {item.seller?.rating?.average || 0} • by{" "}
+                              {item.seller?.name || "Unknown"}
                             </span>
                           </div>
                           <div className="flex flex-wrap gap-1">
-                            {item.tags.slice(0, 2).map((tag) => (
+                            {item.tags?.slice(0, 2).map((tag) => (
                               <Badge
                                 key={tag}
                                 variant="secondary"
@@ -550,7 +687,11 @@ const Browse = () => {
                               >
                                 {tag}
                               </Badge>
-                            ))}
+                            )) || (
+                              <Badge variant="secondary" className="text-xs">
+                                {item.category}
+                              </Badge>
+                            )}
                           </div>
                           <div className="flex items-center justify-between">
                             <div>
@@ -559,7 +700,9 @@ const Browse = () => {
                               </div>
                               <div className="text-xs text-text-muted flex items-center">
                                 <Recycle className="h-3 w-3 mr-1" />
-                                {item.points} pts
+                                {item.points ||
+                                  Math.floor(item.price * 0.1)}{" "}
+                                pts
                               </div>
                             </div>
                             <Badge
@@ -584,19 +727,26 @@ const Browse = () => {
               >
                 {items.map((item, index) => (
                   <motion.div
-                    key={item.id}
+                    key={item._id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index }}
                   >
-                    <Card className="border-border hover:shadow-lg transition-shadow cursor-pointer">
+                    <Card
+                      className="border-border hover:shadow-lg transition-shadow cursor-pointer"
+                      onClick={() => navigate(`/product/${item._id}`)}
+                    >
                       <CardContent className="p-6">
                         <div className="flex gap-4">
                           <div className="w-24 h-24 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
                             <img
-                              src={item.image}
+                              src={item.images?.[0]?.url || "/placeholder.svg"}
                               alt={item.title}
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  "/placeholder.svg";
+                              }}
                             />
                           </div>
                           <div className="flex-1 space-y-2">
@@ -610,7 +760,14 @@ const Browse = () => {
                                 </p>
                               </div>
                               <AuthGuard feature="wishlist">
-                                <Button variant="ghost" size="sm">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleLikeItem(item._id);
+                                  }}
+                                >
                                   <Heart
                                     className={cn(
                                       "h-4 w-4",
@@ -625,11 +782,12 @@ const Browse = () => {
                             <div className="flex items-center space-x-1">
                               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                               <span className="text-xs text-text-secondary">
-                                {item.rating} • by {item.seller}
+                                {item.seller?.rating?.average || 0} • by{" "}
+                                {item.seller?.name || "Unknown"}
                               </span>
                             </div>
                             <div className="flex flex-wrap gap-1">
-                              {item.tags.map((tag) => (
+                              {item.tags?.map((tag) => (
                                 <Badge
                                   key={tag}
                                   variant="secondary"
@@ -637,7 +795,11 @@ const Browse = () => {
                                 >
                                   {tag}
                                 </Badge>
-                              ))}
+                              )) || (
+                                <Badge variant="secondary" className="text-xs">
+                                  {item.category}
+                                </Badge>
+                              )}
                             </div>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-4">
@@ -647,7 +809,9 @@ const Browse = () => {
                                   </div>
                                   <div className="text-xs text-text-muted flex items-center">
                                     <Recycle className="h-3 w-3 mr-1" />
-                                    {item.points} pts
+                                    {item.points ||
+                                      Math.floor(item.price * 0.1)}{" "}
+                                    pts
                                   </div>
                                 </div>
                                 <Badge
@@ -657,7 +821,15 @@ const Browse = () => {
                                   {item.condition}
                                 </Badge>
                               </div>
-                              <Button size="sm">View Details</Button>
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/product/${item._id}`);
+                                }}
+                              >
+                                View Details
+                              </Button>
                             </div>
                           </div>
                         </div>
@@ -669,11 +841,23 @@ const Browse = () => {
             )}
 
             {/* Load More */}
-            <div className="mt-8 text-center">
-              <Button variant="outline" size="lg">
-                Load More Items
-              </Button>
-            </div>
+            {!loading && !error && items.length > 0 && (
+              <div className="mt-8 text-center">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  disabled={currentPage * 12 >= totalItems}
+                >
+                  {currentPage * 12 >= totalItems
+                    ? "No More Items"
+                    : "Load More Items"}
+                </Button>
+                <p className="text-xs text-text-muted mt-2">
+                  Showing {items.length} of {totalItems} items
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
