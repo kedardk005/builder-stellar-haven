@@ -111,48 +111,8 @@ const Dashboard = () => {
   };
 
   // Mock purchases data
-  const myPurchases = [
-    {
-      id: 1,
-      title: "Silk Formal Shirt",
-      price: 650,
-      points: 35,
-      seller: "FashionLover23",
-      date: "2024-01-15",
-      image: "/placeholder.svg",
-      status: "Delivered",
-    },
-    {
-      id: 2,
-      title: "Winter Wool Coat",
-      price: 890,
-      points: 45,
-      seller: "WinterWardrobe",
-      date: "2024-01-10",
-      image: "/placeholder.svg",
-      status: "In Transit",
-    },
-    {
-      id: 3,
-      title: "Vintage Sunglasses",
-      price: 340,
-      points: 22,
-      seller: "RetroStyle",
-      date: "2024-01-08",
-      image: "/placeholder.svg",
-      status: "Delivered",
-    },
-    {
-      id: 4,
-      title: "Athletic Shorts",
-      price: 180,
-      points: 12,
-      seller: "SportyFashion",
-      date: "2024-01-05",
-      image: "/placeholder.svg",
-      status: "Delivered",
-    },
-  ];
+  // For now, no purchases data - can be added later
+  const myPurchases = [];
 
   return (
     <div className="min-h-screen bg-background">
