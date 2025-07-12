@@ -213,16 +213,22 @@ const Index = () => {
                 transition={{ duration: 0.6, delay: 0.9 }}
               >
                 <div>
-                  <div className="text-2xl font-bold text-white">50K+</div>
-                  <div className="text-sm text-gray-300">Items Exchanged</div>
+                  <div className="text-2xl font-bold text-white">
+                    {loading ? "..." : `${stats.totalItems}+`}
+                  </div>
+                  <div className="text-sm text-gray-300">Items Available</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-white">25K+</div>
-                  <div className="text-sm text-gray-300">Happy Users</div>
+                  <div className="text-2xl font-bold text-white">
+                    {loading ? "..." : `${stats.activeUsers}+`}
+                  </div>
+                  <div className="text-sm text-gray-300">Active Users</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-white">80%</div>
-                  <div className="text-sm text-gray-300">Waste Reduced</div>
+                  <div className="text-2xl font-bold text-white">
+                    {loading ? "..." : `${stats.totalSales}+`}
+                  </div>
+                  <div className="text-sm text-gray-300">Items Sold</div>
                 </div>
               </motion.div>
             </motion.div>
@@ -312,6 +318,13 @@ const Index = () => {
               />
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Demo Removal Notice */}
+      <section className="py-12 bg-background">
+        <div className="container mx-auto px-4">
+          <DemoRemovalNotice />
         </div>
       </section>
 
