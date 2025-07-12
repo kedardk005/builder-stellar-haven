@@ -29,7 +29,11 @@ import {
 } from "lucide-react";
 
 const Sell = () => {
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
