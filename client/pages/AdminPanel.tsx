@@ -468,7 +468,13 @@ const AdminPanel = () => {
               <Clock className="h-4 w-4 text-text-muted" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{pendingItems.length}</div>
+              <div className="text-2xl font-bold">
+                {loading.stats ? (
+                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                ) : (
+                  stats?.pendingItems || 0
+                )}
+              </div>
               <p className="text-xs text-text-muted">Awaiting approval</p>
             </CardContent>
           </Card>
@@ -482,7 +488,11 @@ const AdminPanel = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-destructive">
-                {flaggedItems.length}
+                {loading.stats ? (
+                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                ) : (
+                  stats?.flaggedItems || 0
+                )}
               </div>
               <p className="text-xs text-text-muted">Need attention</p>
             </CardContent>
@@ -497,7 +507,11 @@ const AdminPanel = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {users.filter((u) => u.isActive).length}
+                {loading.stats ? (
+                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                ) : (
+                  stats?.activeUsers || 0
+                )}
               </div>
               <p className="text-xs text-text-muted">Online today</p>
             </CardContent>
@@ -509,8 +523,14 @@ const AdminPanel = () => {
               <Package className="h-4 w-4 text-text-muted" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,247</div>
-              <p className="text-xs text-text-muted">+12% from last month</p>
+              <div className="text-2xl font-bold">
+                {loading.stats ? (
+                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                ) : (
+                  stats?.totalItems || 0
+                )}
+              </div>
+              <p className="text-xs text-text-muted">Total items</p>
             </CardContent>
           </Card>
         </div>
