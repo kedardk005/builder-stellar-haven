@@ -1,0 +1,892 @@
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Shield,
+  CheckCircle,
+  XCircle,
+  Star,
+  Gift,
+  Flag,
+  Eye,
+  Heart,
+  DollarSign,
+  Users,
+  Package,
+  TrendingUp,
+  AlertTriangle,
+  Clock,
+  Search,
+  Filter,
+  MoreHorizontal,
+  Award,
+  Trash2,
+  Edit,
+  Ban,
+  Unlock,
+  RefreshCw,
+} from "lucide-react";
+
+interface Item {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  brand: string;
+  size: string;
+  color: string;
+  condition: string;
+  price: number;
+  originalPrice?: number;
+  images: Array<{ url: string; isPrimary: boolean }>;
+  seller: {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+    rating: { average: number; count: number };
+  };
+  status: "pending" | "approved" | "rejected" | "active" | "sold" | "flagged";
+  qualityBadge: "basic" | "medium" | "high" | "premium";
+  views: number;
+  likes: number;
+  featured: boolean;
+  createdAt: string;
+  rejectionReason?: string;
+  flaggedReasons?: string[];
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  points: number;
+  level: string;
+  avatar?: string;
+  isActive: boolean;
+  isVerified: boolean;
+  totalItemsSold: number;
+  totalItemsBought: number;
+  rating: { average: number; count: number };
+  createdAt: string;
+  lastActive: string;
+}
+
+// Mock data - In real app, this would come from API
+const mockPendingItems: Item[] = [
+  {
+    id: "1",
+    title: "Vintage Denim Jacket",
+    description:
+      "Classic blue denim jacket in excellent condition. Barely worn, from a smoke-free home.",
+    category: "Outerwear",
+    brand: "Levi's",
+    size: "M",
+    color: "Blue",
+    condition: "Excellent",
+    price: 85,
+    originalPrice: 120,
+    images: [{ url: "/placeholder.svg", isPrimary: true }],
+    seller: {
+      id: "u1",
+      name: "Sarah Johnson",
+      email: "sarah@example.com",
+      avatar: "/placeholder.svg",
+      rating: { average: 4.8, count: 24 },
+    },
+    status: "pending",
+    qualityBadge: "high",
+    views: 0,
+    likes: 0,
+    featured: false,
+    createdAt: "2024-01-15T10:30:00Z",
+  },
+  {
+    id: "2",
+    title: "Designer Evening Dress",
+    description:
+      "Stunning black cocktail dress, perfect for special occasions. Only worn once to a wedding.",
+    category: "Dresses",
+    brand: "Zara",
+    size: "S",
+    color: "Black",
+    condition: "Like New",
+    price: 150,
+    originalPrice: 250,
+    images: [{ url: "/placeholder.svg", isPrimary: true }],
+    seller: {
+      id: "u2",
+      name: "Emma Wilson",
+      email: "emma@example.com",
+      rating: { average: 4.9, count: 18 },
+    },
+    status: "pending",
+    qualityBadge: "premium",
+    views: 0,
+    likes: 0,
+    featured: false,
+    createdAt: "2024-01-15T14:20:00Z",
+  },
+];
+
+const mockFlaggedItems: Item[] = [
+  {
+    id: "3",
+    title: "Inappropriate Content Item",
+    description:
+      "This item has been flagged for review due to inappropriate content or policy violation.",
+    category: "Tops",
+    brand: "Unknown",
+    size: "M",
+    color: "Red",
+    condition: "Good",
+    price: 45,
+    images: [{ url: "/placeholder.svg", isPrimary: true }],
+    seller: {
+      id: "u3",
+      name: "Flagged User",
+      email: "flagged@example.com",
+      rating: { average: 3.2, count: 5 },
+    },
+    status: "flagged",
+    qualityBadge: "basic",
+    views: 12,
+    likes: 2,
+    featured: false,
+    createdAt: "2024-01-14T16:45:00Z",
+    flaggedReasons: ["Inappropriate images", "Misleading description"],
+  },
+];
+
+const mockUsers: User[] = [
+  {
+    id: "u1",
+    name: "Sarah Johnson",
+    email: "sarah@example.com",
+    points: 1250,
+    level: "Enthusiast",
+    avatar: "/placeholder.svg",
+    isActive: true,
+    isVerified: true,
+    totalItemsSold: 15,
+    totalItemsBought: 8,
+    rating: { average: 4.8, count: 24 },
+    createdAt: "2023-06-15T10:30:00Z",
+    lastActive: "2024-01-15T10:30:00Z",
+  },
+  {
+    id: "u2",
+    name: "Emma Wilson",
+    email: "emma@example.com",
+    points: 850,
+    level: "Explorer",
+    isActive: true,
+    isVerified: false,
+    totalItemsSold: 8,
+    totalItemsBought: 12,
+    rating: { average: 4.9, count: 18 },
+    createdAt: "2023-08-20T14:20:00Z",
+    lastActive: "2024-01-15T14:20:00Z",
+  },
+];
+
+const AdminPanel = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [pendingItems, setPendingItems] = useState<Item[]>(mockPendingItems);
+  const [flaggedItems, setFlaggedItems] = useState<Item[]>(mockFlaggedItems);
+  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [customPoints, setCustomPoints] = useState("");
+  const [pointsReason, setPointsReason] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState("");
+
+  // Simulate admin check - in real app, this would check user role
+  const isAdmin =
+    user?.email === "admin@rewear.com" ||
+    user?.name?.toLowerCase().includes("admin");
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <Shield className="h-12 w-12 mx-auto text-destructive mb-4" />
+            <CardTitle>Access Denied</CardTitle>
+            <CardDescription>
+              You don't have permission to access the admin panel.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  const handleApproveItem = (itemId: string) => {
+    setPendingItems((items) => items.filter((item) => item.id !== itemId));
+    toast({
+      title: "Item Approved",
+      description:
+        "The item has been approved and is now live on the platform.",
+    });
+  };
+
+  const handleRejectItem = (itemId: string, reason: string) => {
+    setPendingItems((items) => items.filter((item) => item.id !== itemId));
+    toast({
+      title: "Item Rejected",
+      description:
+        "The item has been rejected and the seller has been notified.",
+      variant: "destructive",
+    });
+  };
+
+  const handleMarkQuality = (
+    itemId: string,
+    quality: "basic" | "medium" | "high" | "premium",
+  ) => {
+    setPendingItems((items) =>
+      items.map((item) =>
+        item.id === itemId ? { ...item, qualityBadge: quality } : item,
+      ),
+    );
+    toast({
+      title: "Quality Updated",
+      description: `Item quality has been marked as ${quality}.`,
+    });
+  };
+
+  const handleGrantPoints = () => {
+    if (!selectedUserId || !customPoints || !pointsReason) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all fields to grant points.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUsers((users) =>
+      users.map((user) =>
+        user.id === selectedUserId
+          ? { ...user, points: user.points + parseInt(customPoints) }
+          : user,
+      ),
+    );
+
+    toast({
+      title: "Points Granted",
+      description: `${customPoints} points have been granted to the selected user.`,
+    });
+
+    setCustomPoints("");
+    setPointsReason("");
+    setSelectedUserId("");
+  };
+
+  const handleRemoveFlaggedContent = (itemId: string) => {
+    setFlaggedItems((items) => items.filter((item) => item.id !== itemId));
+    toast({
+      title: "Content Removed",
+      description:
+        "The inappropriate content has been removed from the platform.",
+    });
+  };
+
+  const handleRestoreContent = (itemId: string) => {
+    const item = flaggedItems.find((item) => item.id === itemId);
+    if (item) {
+      setFlaggedItems((items) => items.filter((item) => item.id !== itemId));
+      toast({
+        title: "Content Restored",
+        description:
+          "The content has been reviewed and restored to the platform.",
+      });
+    }
+  };
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <Shield className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold">Admin Panel</h1>
+          </div>
+          <p className="text-text-secondary">
+            Manage items, users, and platform content
+          </p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Pending Items
+              </CardTitle>
+              <Clock className="h-4 w-4 text-text-muted" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{pendingItems.length}</div>
+              <p className="text-xs text-text-muted">Awaiting approval</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Flagged Content
+              </CardTitle>
+              <Flag className="h-4 w-4 text-destructive" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-destructive">
+                {flaggedItems.length}
+              </div>
+              <p className="text-xs text-text-muted">Need attention</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Users
+              </CardTitle>
+              <Users className="h-4 w-4 text-text-muted" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {users.filter((u) => u.isActive).length}
+              </div>
+              <p className="text-xs text-text-muted">Online today</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+              <Package className="h-4 w-4 text-text-muted" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">1,247</div>
+              <p className="text-xs text-text-muted">+12% from last month</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="pending" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="pending">Pending Approvals</TabsTrigger>
+            <TabsTrigger value="quality">Quality Control</TabsTrigger>
+            <TabsTrigger value="rewards">Points & Rewards</TabsTrigger>
+            <TabsTrigger value="moderation">Content Moderation</TabsTrigger>
+          </TabsList>
+
+          {/* Pending Approvals Tab */}
+          <TabsContent value="pending" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Items Awaiting Approval</CardTitle>
+                <CardDescription>
+                  Review and approve or reject submitted items
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {pendingItems.map((item) => (
+                    <div key={item.id} className="border rounded-lg p-4">
+                      <div className="flex gap-4">
+                        <img
+                          src={item.images[0]?.url}
+                          alt={item.title}
+                          className="w-20 h-20 object-cover rounded-lg"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-semibold">{item.title}</h3>
+                              <p className="text-sm text-text-secondary">
+                                {item.brand} • {item.size} • {item.condition}
+                              </p>
+                              <p className="text-sm text-text-muted mt-1">
+                                {item.description}
+                              </p>
+                              <div className="flex items-center gap-2 mt-2">
+                                <Badge variant="outline">${item.price}</Badge>
+                                <Badge variant="secondary">
+                                  {item.category}
+                                </Badge>
+                                <Badge
+                                  variant={
+                                    item.qualityBadge === "premium"
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                >
+                                  {item.qualityBadge}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                onClick={() => handleApproveItem(item.id)}
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Approve
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="destructive" size="sm">
+                                    <XCircle className="h-4 w-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Reject Item
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to reject this item?
+                                      Please provide a reason.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <Textarea placeholder="Reason for rejection..." />
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() =>
+                                        handleRejectItem(
+                                          item.id,
+                                          "Quality issues",
+                                        )
+                                      }
+                                      className="bg-destructive hover:bg-destructive/90"
+                                    >
+                                      Reject Item
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 mt-3 text-sm text-text-muted">
+                            <div className="flex items-center gap-1">
+                              <Avatar className="h-6 w-6">
+                                <AvatarImage src={item.seller.avatar} />
+                                <AvatarFallback>
+                                  {item.seller.name[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              {item.seller.name}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                              {item.seller.rating.average} (
+                              {item.seller.rating.count})
+                            </div>
+                            <span>
+                              Submitted{" "}
+                              {new Date(item.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {pendingItems.length === 0 && (
+                    <div className="text-center py-8 text-text-muted">
+                      <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
+                      <p>No items pending approval</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Quality Control Tab */}
+          <TabsContent value="quality" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Quality Control</CardTitle>
+                <CardDescription>
+                  Mark high-quality uploads and assign quality badges
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {pendingItems.map((item) => (
+                    <div key={item.id} className="border rounded-lg p-4">
+                      <div className="flex gap-4">
+                        <img
+                          src={item.images[0]?.url}
+                          alt={item.title}
+                          className="w-16 h-16 object-cover rounded-lg"
+                        />
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{item.title}</h3>
+                          <p className="text-sm text-text-secondary">
+                            {item.brand} • {item.condition}
+                          </p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-sm">Quality Badge:</span>
+                            <div className="flex gap-2">
+                              {(
+                                ["basic", "medium", "high", "premium"] as const
+                              ).map((quality) => (
+                                <Button
+                                  key={quality}
+                                  variant={
+                                    item.qualityBadge === quality
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                  size="sm"
+                                  onClick={() =>
+                                    handleMarkQuality(item.id, quality)
+                                  }
+                                >
+                                  {quality === "premium" && (
+                                    <Award className="h-3 w-3 mr-1" />
+                                  )}
+                                  {quality.charAt(0).toUpperCase() +
+                                    quality.slice(1)}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {pendingItems.length === 0 && (
+                    <div className="text-center py-8 text-text-muted">
+                      <Award className="h-12 w-12 mx-auto mb-4 text-primary" />
+                      <p>No items available for quality review</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Points & Rewards Tab */}
+          <TabsContent value="rewards" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Grant Custom Points</CardTitle>
+                  <CardDescription>
+                    Award points to users for special achievements or
+                    contributions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="user-select">Select User</Label>
+                    <Select
+                      value={selectedUserId}
+                      onValueChange={setSelectedUserId}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a user" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-6 w-6">
+                                <AvatarImage src={user.avatar} />
+                                <AvatarFallback>{user.name[0]}</AvatarFallback>
+                              </Avatar>
+                              {user.name} ({user.points} pts)
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="points">Points to Award</Label>
+                    <Input
+                      id="points"
+                      type="number"
+                      placeholder="Enter points amount"
+                      value={customPoints}
+                      onChange={(e) => setCustomPoints(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="reason">Reason</Label>
+                    <Textarea
+                      id="reason"
+                      placeholder="Reason for awarding points..."
+                      value={pointsReason}
+                      onChange={(e) => setPointsReason(e.target.value)}
+                    />
+                  </div>
+
+                  <Button onClick={handleGrantPoints} className="w-full">
+                    <Gift className="h-4 w-4 mr-2" />
+                    Grant Points
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Management</CardTitle>
+                  <CardDescription>
+                    View and manage user accounts and their points
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-muted" />
+                      <Input
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+
+                    <ScrollArea className="h-64">
+                      <div className="space-y-2">
+                        {filteredUsers.map((user) => (
+                          <div
+                            key={user.id}
+                            className="flex items-center justify-between p-3 border rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={user.avatar} />
+                                <AvatarFallback>{user.name[0]}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{user.name}</p>
+                                <p className="text-sm text-text-muted">
+                                  {user.email}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge variant="secondary">
+                                {user.points} pts
+                              </Badge>
+                              <p className="text-xs text-text-muted mt-1">
+                                {user.level}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Content Moderation Tab */}
+          <TabsContent value="moderation" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Flagged Content</CardTitle>
+                <CardDescription>
+                  Review and manage inappropriate or reported content
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {flaggedItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="border border-destructive/20 rounded-lg p-4 bg-destructive/5"
+                    >
+                      <div className="flex gap-4">
+                        <img
+                          src={item.images[0]?.url}
+                          alt={item.title}
+                          className="w-20 h-20 object-cover rounded-lg"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-semibold">{item.title}</h3>
+                              <p className="text-sm text-text-secondary">
+                                {item.brand} • {item.size}
+                              </p>
+                              <p className="text-sm text-text-muted mt-1">
+                                {item.description}
+                              </p>
+                              {item.flaggedReasons && (
+                                <div className="mt-2">
+                                  <p className="text-sm font-medium text-destructive">
+                                    Flagged for:
+                                  </p>
+                                  <div className="flex gap-1 mt-1">
+                                    {item.flaggedReasons.map(
+                                      (reason, index) => (
+                                        <Badge
+                                          key={index}
+                                          variant="destructive"
+                                          className="text-xs"
+                                        >
+                                          {reason}
+                                        </Badge>
+                                      ),
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                onClick={() => handleRestoreContent(item.id)}
+                                variant="outline"
+                                size="sm"
+                              >
+                                <Unlock className="h-4 w-4 mr-1" />
+                                Restore
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="destructive" size="sm">
+                                    <Trash2 className="h-4 w-4 mr-1" />
+                                    Remove
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Remove Content
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to permanently
+                                      remove this content? This action cannot be
+                                      undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() =>
+                                        handleRemoveFlaggedContent(item.id)
+                                      }
+                                      className="bg-destructive hover:bg-destructive/90"
+                                    >
+                                      Remove Content
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 mt-3 text-sm text-text-muted">
+                            <div className="flex items-center gap-1">
+                              <Avatar className="h-6 w-6">
+                                <AvatarImage src={item.seller.avatar} />
+                                <AvatarFallback>
+                                  {item.seller.name[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              {item.seller.name}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Eye className="h-4 w-4" />
+                              {item.views}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Heart className="h-4 w-4" />
+                              {item.likes}
+                            </div>
+                            <span>
+                              Flagged{" "}
+                              {new Date(item.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {flaggedItems.length === 0 && (
+                    <div className="text-center py-8 text-text-muted">
+                      <Shield className="h-12 w-12 mx-auto mb-4 text-green-500" />
+                      <p>No flagged content to review</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default AdminPanel;
