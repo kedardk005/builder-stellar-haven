@@ -426,6 +426,159 @@ export function createServer() {
     });
   });
 
+  // Exchange routes
+
+  // 1. Swap Request
+  app.post("/api/items/:id/swap", mockAuth, (req, res) => {
+    const { id } = req.params;
+    const { message, offeredItemId } = req.body;
+
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const item = mockItems.find((i) => i.id === id || i._id === id);
+    if (!item) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Item not found" });
+    }
+
+    if (!item.swapEnabled) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Swap not available for this item" });
+    }
+
+    // Mock swap request creation
+    const swapRequest = {
+      id: Date.now().toString(),
+      itemId: id,
+      requesterId: req.user.id,
+      sellerId: item.seller.id,
+      message: message || "I'd like to swap for this item",
+      offeredItemId,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    };
+
+    res.json({
+      success: true,
+      message: "Swap request sent successfully!",
+      data: swapRequest,
+    });
+  });
+
+  // 2. Points Redemption
+  app.post("/api/items/:id/redeem", mockAuth, (req, res) => {
+    const { id } = req.params;
+
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const item = mockItems.find((i) => i.id === id || i._id === id);
+    if (!item) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Item not found" });
+    }
+
+    if (!item.pointsEnabled) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Points redemption not available for this item",
+        });
+    }
+
+    const pointsCost = item.pointsValue || 3;
+
+    if (req.user.points < pointsCost) {
+      return res.status(400).json({
+        success: false,
+        message: `Insufficient points. You need ${pointsCost} points but have ${req.user.points}`,
+      });
+    }
+
+    // Deduct points and create order
+    req.user.points -= pointsCost;
+    item.status = "sold";
+
+    // Award points to seller for successful exchange (+3 as per specification)
+    const seller = mockUsers.find((u) => u.id === item.seller.id);
+    if (seller) {
+      seller.points += 3;
+    }
+
+    const order = {
+      id: Date.now().toString(),
+      itemId: id,
+      buyerId: req.user.id,
+      sellerId: item.seller.id,
+      method: "points",
+      pointsUsed: pointsCost,
+      status: "completed",
+      createdAt: new Date().toISOString(),
+    };
+
+    res.json({
+      success: true,
+      message: `Item redeemed successfully! ${pointsCost} points deducted. Seller earned +3 points.`,
+      data: order,
+    });
+  });
+
+  // 3. INR Purchase
+  app.post("/api/items/:id/purchase", mockAuth, (req, res) => {
+    const { id } = req.params;
+    const { paymentMethod } = req.body;
+
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const item = mockItems.find((i) => i.id === id || i._id === id);
+    if (!item) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Item not found" });
+    }
+
+    if (!item.purchaseEnabled) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Purchase not available for this item",
+        });
+    }
+
+    // Mock payment processing (in reality, integrate with Razorpay)
+    const order = {
+      id: Date.now().toString(),
+      itemId: id,
+      buyerId: req.user.id,
+      sellerId: item.seller.id,
+      method: "purchase",
+      amount: item.price,
+      currency: "INR",
+      paymentMethod: paymentMethod || "razorpay",
+      status: "pending_payment",
+      createdAt: new Date().toISOString(),
+      razorpayOrderId: `order_${Date.now()}`, // Mock Razorpay order ID
+    };
+
+    res.json({
+      success: true,
+      message:
+        "Order created successfully. Complete payment to finalize purchase.",
+      data: order,
+      paymentUrl: `/payment/${order.id}`, // Mock payment URL
+    });
+  });
+
   // Example API routes
   app.get("/api/ping", (_req, res) => {
     res.json({ message: "Hello from Express server v2!" });
