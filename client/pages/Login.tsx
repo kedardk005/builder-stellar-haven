@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,22 +10,36 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Recycle, User, Lock } from "lucide-react";
 
 const Login = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setError(""); // Clear error when user types
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Login submitted:", formData);
+    setIsLoading(true);
+    setError("");
+
+    try {
+      await login(formData.username, formData.password);
+      navigate("/dashboard"); // Redirect to dashboard after successful login
+    } catch (err) {
+      setError("Invalid credentials. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -116,12 +131,19 @@ const Login = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
+                {error && (
+                  <div className="text-sm text-destructive text-center p-2 bg-destructive/10 rounded">
+                    {error}
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   className="w-full bg-primary hover:bg-hover text-primary-foreground"
                   size="lg"
+                  disabled={isLoading}
                 >
-                  Login
+                  {isLoading ? "Signing In..." : "Login"}
                 </Button>
               </motion.div>
             </form>
