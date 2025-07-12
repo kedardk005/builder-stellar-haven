@@ -72,7 +72,8 @@ import {
 } from "lucide-react";
 
 interface Item {
-  id: string;
+  _id: string;
+  id?: string;
   title: string;
   description: string;
   category: string;
@@ -272,7 +273,9 @@ const AdminPanel = () => {
     try {
       const response = await adminApi.approveItem(itemId, qualityBadge);
       if (response.success) {
-        setPendingItems((items) => items.filter((item) => item.id !== itemId));
+        setPendingItems((items) =>
+          items.filter((item) => (item._id || item.id) !== itemId),
+        );
         // Refresh stats
         fetchStats();
         toast({
@@ -295,7 +298,9 @@ const AdminPanel = () => {
     try {
       const response = await adminApi.rejectItem(itemId, reason);
       if (response.success) {
-        setPendingItems((items) => items.filter((item) => item.id !== itemId));
+        setPendingItems((items) =>
+          items.filter((item) => (item._id || item.id) !== itemId),
+        );
         // Refresh stats
         fetchStats();
         toast({
@@ -324,7 +329,9 @@ const AdminPanel = () => {
       if (response.success) {
         setPendingItems((items) =>
           items.map((item) =>
-            item.id === itemId ? { ...item, qualityBadge: quality } : item,
+            (item._id || item.id) === itemId
+              ? { ...item, qualityBadge: quality }
+              : item,
           ),
         );
         toast({
@@ -363,7 +370,7 @@ const AdminPanel = () => {
       if (response.success) {
         setUsers((users) =>
           users.map((user) =>
-            user.id === selectedUserId
+            (user._id || user.id) === selectedUserId
               ? { ...user, points: user.points + parseInt(customPoints) }
               : user,
           ),
