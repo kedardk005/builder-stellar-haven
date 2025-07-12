@@ -1,0 +1,419 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import {
+  User,
+  MapPin,
+  Calendar,
+  Recycle,
+  Star,
+  Heart,
+  ShoppingBag,
+  Package,
+  TrendingUp,
+  Award,
+  Edit,
+  Eye,
+  Search,
+} from "lucide-react";
+
+const Dashboard = () => {
+  const [activeTab, setActiveTab] = useState("overview");
+
+  // Mock user data
+  const userData = {
+    name: "John Doe",
+    email: "john.doe@email.com",
+    phone: "+91 98765 43210",
+    location: "Mumbai, Maharashtra",
+    joinDate: "January 2024",
+    points: 125,
+    level: "Eco Warrior",
+    totalListings: 12,
+    totalSales: 8,
+    totalPurchases: 15,
+    rating: 4.8,
+    completedSwaps: 23,
+  };
+
+  // Mock listings data
+  const myListings = [
+    {
+      id: 1,
+      title: "Vintage Denim Jacket",
+      price: 450,
+      points: 25,
+      status: "Active",
+      image: "/placeholder.svg",
+      views: 34,
+      likes: 12,
+    },
+    {
+      id: 2,
+      title: "Summer Floral Dress",
+      price: 280,
+      points: 18,
+      status: "Sold",
+      image: "/placeholder.svg",
+      views: 56,
+      likes: 8,
+    },
+    {
+      id: 3,
+      title: "Designer Leather Bag",
+      price: 1200,
+      points: 65,
+      status: "Pending",
+      image: "/placeholder.svg",
+      views: 23,
+      likes: 15,
+    },
+    {
+      id: 4,
+      title: "Casual Sneakers",
+      price: 320,
+      points: 20,
+      status: "Active",
+      image: "/placeholder.svg",
+      views: 19,
+      likes: 6,
+    },
+  ];
+
+  // Mock purchases data
+  const myPurchases = [
+    {
+      id: 1,
+      title: "Silk Formal Shirt",
+      price: 650,
+      points: 35,
+      seller: "FashionLover23",
+      date: "2024-01-15",
+      image: "/placeholder.svg",
+      status: "Delivered",
+    },
+    {
+      id: 2,
+      title: "Winter Wool Coat",
+      price: 890,
+      points: 45,
+      seller: "WinterWardrobe",
+      date: "2024-01-10",
+      image: "/placeholder.svg",
+      status: "In Transit",
+    },
+    {
+      id: 3,
+      title: "Vintage Sunglasses",
+      price: 340,
+      points: 22,
+      seller: "RetroStyle",
+      date: "2024-01-08",
+      image: "/placeholder.svg",
+      status: "Delivered",
+    },
+    {
+      id: 4,
+      title: "Athletic Shorts",
+      price: 180,
+      points: 12,
+      seller: "SportyFashion",
+      date: "2024-01-05",
+      image: "/placeholder.svg",
+      status: "Delivered",
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                My Dashboard
+              </h1>
+              <p className="text-text-secondary">
+                Manage your ReWear profile and activities
+              </p>
+            </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+              <input
+                type="text"
+                placeholder="Search your items..."
+                className="pl-10 pr-4 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent w-64"
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Profile Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <Card className="border-border">
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row gap-6">
+                {/* Profile Avatar & Basic Info */}
+                <div className="flex items-center space-x-4">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src="/placeholder-avatar.jpg" />
+                    <AvatarFallback className="text-xl bg-primary text-primary-foreground">
+                      {userData.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <h2 className="text-xl font-semibold text-foreground">
+                      {userData.name}
+                    </h2>
+                    <p className="text-text-secondary text-sm flex items-center">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {userData.location}
+                    </p>
+                    <p className="text-text-secondary text-sm flex items-center">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      Member since {userData.joinDate}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="text-center p-3 bg-surface rounded-lg">
+                    <div className="flex items-center justify-center mb-2">
+                      <Recycle className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {userData.points}
+                    </div>
+                    <div className="text-xs text-text-muted">ReWear Points</div>
+                  </div>
+                  <div className="text-center p-3 bg-surface rounded-lg">
+                    <div className="flex items-center justify-center mb-2">
+                      <Package className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {userData.totalListings}
+                    </div>
+                    <div className="text-xs text-text-muted">Items Listed</div>
+                  </div>
+                  <div className="text-center p-3 bg-surface rounded-lg">
+                    <div className="flex items-center justify-center mb-2">
+                      <ShoppingBag className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {userData.totalPurchases}
+                    </div>
+                    <div className="text-xs text-text-muted">Purchases</div>
+                  </div>
+                  <div className="text-center p-3 bg-surface rounded-lg">
+                    <div className="flex items-center justify-center mb-2">
+                      <Star className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {userData.rating}
+                    </div>
+                    <div className="text-xs text-text-muted">Rating</div>
+                  </div>
+                </div>
+
+                {/* Level & Progress */}
+                <div className="lg:w-64 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Badge className="bg-primary text-primary-foreground">
+                      <Award className="h-3 w-3 mr-1" />
+                      {userData.level}
+                    </Badge>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit Profile
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-text-secondary">
+                        Progress to next level
+                      </span>
+                      <span className="text-foreground">75%</span>
+                    </div>
+                    <Progress value={75} className="h-2" />
+                    <p className="text-xs text-text-muted">
+                      25 more points to reach "Sustainability Champion"
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* My Listings Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8"
+        >
+          <Card className="border-border">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl">My Listings</CardTitle>
+                <Button variant="outline" size="sm">
+                  View All
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {myListings.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 + index * 0.1 }}
+                    whileHover={{ scale: 1.02 }}
+                    className="border border-border rounded-lg p-3 bg-surface cursor-pointer"
+                  >
+                    <div className="aspect-square bg-muted rounded-md mb-3 relative overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.parentElement!.innerHTML =
+                            '<div class="w-full h-full flex items-center justify-center text-text-muted text-xs">No Image</div>';
+                        }}
+                      />
+                      <Badge
+                        className={`absolute top-2 right-2 text-xs ${
+                          item.status === "Active"
+                            ? "bg-green-500"
+                            : item.status === "Sold"
+                              ? "bg-blue-500"
+                              : "bg-yellow-500"
+                        }`}
+                      >
+                        {item.status}
+                      </Badge>
+                    </div>
+                    <h4 className="font-medium text-sm mb-2 truncate">
+                      {item.title}
+                    </h4>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-semibold text-foreground">
+                        ₹{item.price}
+                      </span>
+                      <span className="text-xs text-text-muted flex items-center">
+                        <Recycle className="h-3 w-3 mr-1" />
+                        {item.points} pts
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs text-text-muted">
+                      <span className="flex items-center">
+                        <Eye className="h-3 w-3 mr-1" />
+                        {item.views}
+                      </span>
+                      <span className="flex items-center">
+                        <Heart className="h-3 w-3 mr-1" />
+                        {item.likes}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* My Purchases Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Card className="border-border">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl">My Purchases</CardTitle>
+                <Button variant="outline" size="sm">
+                  View All
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {myPurchases.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 + index * 0.1 }}
+                    whileHover={{ scale: 1.02 }}
+                    className="border border-border rounded-lg p-3 bg-surface cursor-pointer"
+                  >
+                    <div className="aspect-square bg-muted rounded-md mb-3 relative overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.parentElement!.innerHTML =
+                            '<div class="w-full h-full flex items-center justify-center text-text-muted text-xs">No Image</div>';
+                        }}
+                      />
+                      <Badge
+                        className={`absolute top-2 right-2 text-xs ${
+                          item.status === "Delivered"
+                            ? "bg-green-500"
+                            : "bg-blue-500"
+                        }`}
+                      >
+                        {item.status}
+                      </Badge>
+                    </div>
+                    <h4 className="font-medium text-sm mb-2 truncate">
+                      {item.title}
+                    </h4>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-semibold text-foreground">
+                        ₹{item.price}
+                      </span>
+                      <span className="text-xs text-text-muted flex items-center">
+                        <Recycle className="h-3 w-3 mr-1" />
+                        {item.points} pts
+                      </span>
+                    </div>
+                    <div className="text-xs text-text-muted">
+                      <div>Seller: {item.seller}</div>
+                      <div>{new Date(item.date).toLocaleDateString()}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
