@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { itemsApi } from "@/lib/api";
-import { DemoRemovalNotice } from "@/components/DemoRemovalNotice";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -318,13 +317,6 @@ const Index = () => {
               />
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Demo Removal Notice */}
-      <section className="py-12 bg-background">
-        <div className="container mx-auto px-4">
-          <DemoRemovalNotice />
         </div>
       </section>
 
