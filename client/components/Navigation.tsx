@@ -14,13 +14,14 @@ import {
   Search,
   Recycle,
   Bell,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
 
   const navItems = [
     { label: "Browse", href: "/browse", icon: ShoppingBag },
@@ -112,6 +113,25 @@ export const Navigation = () => {
                   <Bell className="h-4 w-4" />
                   <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full"></span>
                 </Button>
+
+                {/* Admin Link */}
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "flex items-center space-x-2",
+                        isActive("/admin")
+                          ? "bg-accent text-accent-foreground"
+                          : "text-text-secondary hover:text-foreground",
+                      )}
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span className="text-sm">Admin</span>
+                    </Button>
+                  </Link>
+                )}
 
                 {/* Profile */}
                 <Link to="/dashboard">
@@ -256,6 +276,21 @@ export const Navigation = () => {
               {/* Profile/Auth Links for Mobile */}
               {isAuthenticated ? (
                 <>
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      className={cn(
+                        "flex items-center space-x-3 px-2 py-3 rounded-lg text-sm font-medium transition-colors",
+                        isActive("/admin")
+                          ? "bg-accent text-accent-foreground"
+                          : "text-text-secondary hover:bg-surface hover:text-foreground",
+                      )}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Shield className="h-5 w-5" />
+                      <span>Admin Panel</span>
+                    </Link>
+                  )}
                   <Link
                     to="/dashboard"
                     className="flex items-center space-x-3 px-2 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface hover:text-foreground transition-colors"
