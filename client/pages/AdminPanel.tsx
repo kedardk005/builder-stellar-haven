@@ -150,8 +150,9 @@ const AdminPanel = () => {
   const [pointsReason, setPointsReason] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
 
-  // Check admin access
+  // Check admin access - allow users to see their own items
   const isAdmin = user?.role === "admin" || user?.email?.includes("admin");
+  const canAccessAdmin = isAdmin || isAuthenticated; // Allow all authenticated users
 
   // Fetch admin stats
   const fetchStats = async () => {
