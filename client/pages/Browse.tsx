@@ -853,16 +853,26 @@ const Browse = () => {
                             </div>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-4">
-                                <div>
-                                  <div className="font-semibold text-foreground">
-                                    ₹{item.price}
-                                  </div>
-                                  <div className="text-xs text-text-muted flex items-center">
-                                    <Recycle className="h-3 w-3 mr-1" />
-                                    {item.points ||
-                                      Math.floor(item.price * 0.1)}{" "}
-                                    pts
-                                  </div>
+                                {/* Exchange Options */}
+                                <div className="flex items-center space-x-3">
+                                  {item.swapEnabled !== false && (
+                                    <div className="flex items-center gap-1 text-xs bg-surface px-2 py-1 rounded">
+                                      <ArrowRightLeft className="h-3 w-3 text-blue-500" />
+                                      <span>Swap</span>
+                                    </div>
+                                  )}
+                                  {item.pointsEnabled !== false && (
+                                    <div className="flex items-center gap-1 text-xs bg-surface px-2 py-1 rounded">
+                                      <Coins className="h-3 w-3 text-green-500" />
+                                      <span>{item.pointsValue || 3}pts</span>
+                                    </div>
+                                  )}
+                                  {item.purchaseEnabled !== false && (
+                                    <div className="flex items-center gap-1 text-xs bg-surface px-2 py-1 rounded">
+                                      <CreditCard className="h-3 w-3 text-purple-500" />
+                                      <span>₹{item.price}</span>
+                                    </div>
+                                  )}
                                 </div>
                                 <Badge
                                   variant="outline"
