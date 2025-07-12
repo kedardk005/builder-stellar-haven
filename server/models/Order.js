@@ -2,11 +2,6 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
-    orderNumber: {
-      type: String,
-      unique: true,
-      required: true,
-    },
     buyer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -22,69 +17,49 @@ const orderSchema = new mongoose.Schema(
       ref: "Item",
       required: true,
     },
-    itemSnapshot: {
-      title: String,
-      price: Number,
-      images: [
-        {
-          url: String,
-          isPrimary: Boolean,
-        },
-      ],
-      condition: String,
-      brand: String,
-      size: String,
+    amount: {
+      type: Number,
+      required: true,
+      min: [0, "Amount cannot be negative"],
+    },
+    itemPrice: {
+      type: Number,
+      required: true,
+      min: [0, "Item price cannot be negative"],
+    },
+    shippingCost: {
+      type: Number,
+      default: 0,
+      min: [0, "Shipping cost cannot be negative"],
+    },
+    discount: {
+      type: Number,
+      default: 0,
+      min: [0, "Discount cannot be negative"],
     },
     paymentMethod: {
       type: String,
-      enum: ["razorpay", "points", "mixed"],
       required: true,
+      enum: ["razorpay", "points", "cod"],
+      default: "razorpay",
     },
-    paymentDetails: {
-      razorpayOrderId: String,
-      razorpayPaymentId: String,
-      razorpaySignature: String,
-      pointsUsed: {
-        type: Number,
-        default: 0,
-      },
-      cashAmount: {
-        type: Number,
-        default: 0,
-      },
-    },
-    pricing: {
-      itemPrice: {
-        type: Number,
-        required: true,
-      },
-      shippingCost: {
-        type: Number,
-        required: true,
-      },
-      platformFee: {
-        type: Number,
-        default: 0,
-      },
-      discount: {
-        type: Number,
-        default: 0,
-      },
-      pointsDiscount: {
-        type: Number,
-        default: 0,
-      },
-      totalAmount: {
-        type: Number,
-        required: true,
-      },
+    status: {
+      type: String,
+      required: true,
+      enum: [
+        "pending",
+        "paid",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "refunded",
+        "disputed",
+      ],
+      default: "pending",
     },
     shippingAddress: {
       fullName: {
-        type: String,
-        required: true,
-      },
-      email: {
         type: String,
         required: true,
       },
@@ -92,10 +67,11 @@ const orderSchema = new mongoose.Schema(
         type: String,
         required: true,
       },
-      street: {
+      addressLine1: {
         type: String,
         required: true,
       },
+      addressLine2: String,
       city: {
         type: String,
         required: true,
@@ -112,46 +88,29 @@ const orderSchema = new mongoose.Schema(
         type: String,
         default: "India",
       },
-      specialInstructions: String,
     },
-    status: {
-      type: String,
-      enum: [
-        "pending",
-        "payment_pending",
-        "payment_failed",
-        "confirmed",
-        "processing",
-        "shipped",
-        "in_transit",
-        "delivered",
-        "cancelled",
-        "refunded",
-        "disputed",
-      ],
-      default: "pending",
+    // Payment tracking
+    razorpayOrderId: String,
+    razorpayPaymentId: String,
+    razorpaySignature: String,
+    paidAt: Date,
+    // Shipping tracking
+    trackingNumber: String,
+    shippedAt: Date,
+    estimatedDelivery: Date,
+    deliveredAt: Date,
+    // Cancellation/Refund
+    cancelledAt: Date,
+    cancellationReason: String,
+    refundedAt: Date,
+    refundAmount: Number,
+    refundReason: String,
+    // Points transaction (if paid with points)
+    pointsUsed: {
+      type: Number,
+      default: 0,
     },
-    trackingInfo: {
-      trackingNumber: String,
-      carrier: String,
-      trackingUrl: String,
-      estimatedDelivery: Date,
-    },
-    timeline: [
-      {
-        status: String,
-        timestamp: {
-          type: Date,
-          default: Date.now,
-        },
-        note: String,
-        updatedBy: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
-      },
-    ],
-    pointsAwarded: {
+    pointsEarned: {
       buyer: {
         type: Number,
         default: 0,
@@ -161,41 +120,36 @@ const orderSchema = new mongoose.Schema(
         default: 0,
       },
     },
-    rating: {
-      byBuyer: {
-        rating: {
-          type: Number,
-          min: 1,
-          max: 5,
-        },
-        review: String,
-        createdAt: Date,
+    // Reviews
+    buyerReview: {
+      rating: {
+        type: Number,
+        min: 1,
+        max: 5,
       },
-      bySeller: {
-        rating: {
-          type: Number,
-          min: 1,
-          max: 5,
-        },
-        review: String,
-        createdAt: Date,
+      comment: String,
+      reviewedAt: Date,
+    },
+    sellerReview: {
+      rating: {
+        type: Number,
+        min: 1,
+        max: 5,
       },
+      comment: String,
+      reviewedAt: Date,
     },
-    notes: {
-      buyer: String,
-      seller: String,
-      admin: String,
+    // Dispute handling
+    disputeReason: String,
+    disputeRaisedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
-    isGift: {
-      type: Boolean,
-      default: false,
-    },
-    giftMessage: String,
-    cancellationReason: String,
-    refundAmount: Number,
-    refundedAt: Date,
-    deliveredAt: Date,
-    estimatedDeliveryDate: Date,
+    disputeRaisedAt: Date,
+    disputeResolvedAt: Date,
+    disputeResolution: String,
+    // Internal notes for admin
+    adminNotes: String,
   },
   {
     timestamps: true,
@@ -204,117 +158,155 @@ const orderSchema = new mongoose.Schema(
   },
 );
 
-// Indexes
+// Indexes for better query performance
 orderSchema.index({ buyer: 1, createdAt: -1 });
 orderSchema.index({ seller: 1, createdAt: -1 });
 orderSchema.index({ item: 1 });
-orderSchema.index({ orderNumber: 1 });
 orderSchema.index({ status: 1 });
-orderSchema.index({ "paymentDetails.razorpayOrderId": 1 });
+orderSchema.index({ razorpayOrderId: 1 });
+orderSchema.index({ razorpayPaymentId: 1 });
 
-// Generate order number
+// Virtual for order total with discounts
+orderSchema.virtual("finalAmount").get(function () {
+  return this.amount - this.discount;
+});
+
+// Virtual for order duration
+orderSchema.virtual("orderAge").get(function () {
+  return Date.now() - this.createdAt;
+});
+
+// Mark order as paid
+orderSchema.methods.markAsPaid = function (paymentDetails = {}) {
+  this.status = "paid";
+  this.paidAt = new Date();
+
+  if (paymentDetails.razorpayPaymentId) {
+    this.razorpayPaymentId = paymentDetails.razorpayPaymentId;
+  }
+  if (paymentDetails.razorpaySignature) {
+    this.razorpaySignature = paymentDetails.razorpaySignature;
+  }
+
+  return this.save();
+};
+
+// Mark order as shipped
+orderSchema.methods.markAsShipped = function (
+  trackingNumber,
+  estimatedDelivery,
+) {
+  this.status = "shipped";
+  this.shippedAt = new Date();
+  this.trackingNumber = trackingNumber;
+  if (estimatedDelivery) {
+    this.estimatedDelivery = estimatedDelivery;
+  }
+  return this.save();
+};
+
+// Mark order as delivered
+orderSchema.methods.markAsDelivered = function () {
+  this.status = "delivered";
+  this.deliveredAt = new Date();
+  return this.save();
+};
+
+// Cancel order
+orderSchema.methods.cancelOrder = function (reason) {
+  this.status = "cancelled";
+  this.cancelledAt = new Date();
+  this.cancellationReason = reason;
+  return this.save();
+};
+
+// Add buyer review
+orderSchema.methods.addBuyerReview = function (rating, comment) {
+  this.buyerReview = {
+    rating,
+    comment,
+    reviewedAt: new Date(),
+  };
+  return this.save();
+};
+
+// Add seller review
+orderSchema.methods.addSellerReview = function (rating, comment) {
+  this.sellerReview = {
+    rating,
+    comment,
+    reviewedAt: new Date(),
+  };
+  return this.save();
+};
+
+// Raise dispute
+orderSchema.methods.raiseDispute = function (userId, reason) {
+  this.status = "disputed";
+  this.disputeReason = reason;
+  this.disputeRaisedBy = userId;
+  this.disputeRaisedAt = new Date();
+  return this.save();
+};
+
+// Calculate platform fee (for future use)
+orderSchema.methods.calculatePlatformFee = function (feePercentage = 5) {
+  return (this.itemPrice * feePercentage) / 100;
+};
+
+// Pre-save middleware to update item status when order is paid
 orderSchema.pre("save", async function (next) {
-  if (this.isNew && !this.orderNumber) {
-    const timestamp = Date.now().toString();
-    const randomSuffix = Math.random()
-      .toString(36)
-      .substring(2, 8)
-      .toUpperCase();
-    this.orderNumber = `RW${timestamp.slice(-8)}${randomSuffix}`;
+  if (this.isModified("status") && this.status === "paid") {
+    try {
+      const Item = mongoose.model("Item");
+      await Item.findByIdAndUpdate(this.item, {
+        status: "sold",
+        soldTo: this.buyer,
+        soldAt: new Date(),
+      });
+    } catch (error) {
+      console.error("Error updating item status:", error);
+    }
   }
   next();
 });
 
-// Add status to timeline
-orderSchema.methods.updateStatus = function (
-  newStatus,
-  note = "",
-  updatedBy = null,
-) {
-  this.status = newStatus;
-  this.timeline.push({
-    status: newStatus,
-    timestamp: new Date(),
-    note,
-    updatedBy,
-  });
+// Post-save middleware to handle points allocation
+orderSchema.post("save", async function () {
+  if (this.status === "paid" && !this.pointsEarned.buyer) {
+    try {
+      const User = mongoose.model("User");
 
-  // Set delivered date
-  if (newStatus === "delivered") {
-    this.deliveredAt = new Date();
+      // Award points to buyer (1% of amount spent)
+      const buyerPoints = Math.floor(this.itemPrice * 0.01 * 100); // 1 point per rupee
+      await User.findByIdAndUpdate(this.buyer, {
+        $inc: { points: buyerPoints },
+      });
+
+      // Award points to seller (5% of amount earned)
+      const sellerPoints = Math.floor(this.itemPrice * 0.05 * 100); // 5 points per rupee
+      await User.findByIdAndUpdate(this.seller, {
+        $inc: { points: sellerPoints, totalItemsSold: 1 },
+      });
+
+      // Update buyer's purchase count
+      await User.findByIdAndUpdate(this.buyer, {
+        $inc: { totalItemsBought: 1 },
+      });
+
+      // Update the points earned in this order
+      this.pointsEarned = {
+        buyer: buyerPoints,
+        seller: sellerPoints,
+      };
+      await this.updateOne(
+        { pointsEarned: this.pointsEarned },
+        { timestamps: false },
+      );
+    } catch (error) {
+      console.error("Error updating user points:", error);
+    }
   }
-
-  return this.save();
-};
-
-// Calculate points to award
-orderSchema.methods.calculatePointsToAward = function () {
-  const basePoints = Math.floor(this.pricing.itemPrice * 0.05); // 5% of item price
-
-  return {
-    buyer: basePoints, // Points for buying
-    seller: basePoints * 2, // More points for selling
-  };
-};
-
-// Award points to buyer and seller
-orderSchema.methods.awardPoints = async function () {
-  if (this.pointsAwarded.buyer > 0 || this.pointsAwarded.seller > 0) {
-    return; // Points already awarded
-  }
-
-  const pointsToAward = this.calculatePointsToAward();
-
-  const User = mongoose.model("User");
-  const buyer = await User.findById(this.buyer);
-  const seller = await User.findById(this.seller);
-
-  if (buyer) {
-    await buyer.addPoints(
-      pointsToAward.buyer,
-      `Purchase order ${this.orderNumber}`,
-    );
-    this.pointsAwarded.buyer = pointsToAward.buyer;
-  }
-
-  if (seller) {
-    await seller.addPoints(
-      pointsToAward.seller,
-      `Sale order ${this.orderNumber}`,
-    );
-    this.pointsAwarded.seller = pointsToAward.seller;
-  }
-
-  return this.save();
-};
-
-// Virtual for order age
-orderSchema.virtual("orderAge").get(function () {
-  const now = new Date();
-  const ageInMs = now - this.createdAt;
-  const ageInDays = Math.floor(ageInMs / (1000 * 60 * 60 * 24));
-  return ageInDays;
 });
-
-// Virtual for current timeline status
-orderSchema.virtual("currentTimeline").get(function () {
-  return this.timeline[this.timeline.length - 1];
-});
-
-// Static method to get order statistics
-orderSchema.statics.getOrderStats = function (userId, type = "buyer") {
-  const matchField = type === "buyer" ? "buyer" : "seller";
-
-  return this.aggregate([
-    { $match: { [matchField]: mongoose.Types.ObjectId(userId) } },
-    {
-      $group: {
-        _id: "$status",
-        count: { $sum: 1 },
-        totalAmount: { $sum: "$pricing.totalAmount" },
-      },
-    },
-  ]);
-};
 
 module.exports = mongoose.model("Order", orderSchema);
