@@ -166,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
-    isAdmin: user?.role === "admin" || user?.email?.includes("admin") || false,
+    isAdmin: user?.role === "admin" || false,
     login,
     register,
     logout,
