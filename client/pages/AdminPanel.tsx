@@ -259,7 +259,7 @@ const AdminPanel = () => {
     }
   }, [searchTerm, isAdmin]);
 
-  if (!isAdmin) {
+  if (!canAccessAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -267,7 +267,7 @@ const AdminPanel = () => {
             <Shield className="h-12 w-12 mx-auto text-destructive mb-4" />
             <CardTitle>Access Denied</CardTitle>
             <CardDescription>
-              You don't have permission to access the admin panel.
+              Please sign in to view your items.
             </CardDescription>
           </CardHeader>
         </Card>
