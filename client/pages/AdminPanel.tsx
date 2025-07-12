@@ -468,10 +468,14 @@ const AdminPanel = () => {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <Shield className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Admin Panel</h1>
+            <h1 className="text-3xl font-bold">
+              {isAdmin ? "Admin Panel" : "My Items Dashboard"}
+            </h1>
           </div>
           <p className="text-text-secondary">
-            Manage items, users, and platform content
+            {isAdmin
+              ? "Manage items, users, and platform content"
+              : "View and manage your listed items"}
           </p>
         </div>
 
