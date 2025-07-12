@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { AuthGuard, ProtectedButton } from "@/components/AuthGuard";
 import { useAuth } from "@/contexts/AuthContext";
+import { itemsApi, ApiError } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 import {
   Filter,
   Search,
@@ -28,13 +30,68 @@ import {
   ShoppingBag,
   Users,
   Sparkles,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+interface Item {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  brand: string;
+  size: string;
+  color: string;
+  condition: string;
+  price: number;
+  originalPrice?: number;
+  images: Array<{ url: string; isPrimary: boolean }>;
+  seller: {
+    _id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+    rating: { average: number; count: number };
+  };
+  status: string;
+  qualityBadge: "basic" | "medium" | "high" | "premium";
+  views: number;
+  likes: number;
+  likedBy: string[];
+  featured: boolean;
+  createdAt: string;
+  tags?: string[];
+  isLiked?: boolean;
+  points?: number;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data: Item[];
+  pagination?: {
+    current: number;
+    pages: number;
+    total: number;
+    limit: number;
+  };
+}
+
 const Browse = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const { toast } = useToast();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCondition, setSelectedCondition] = useState("");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Auto-changing banner images
   const bannerImages = [
@@ -65,105 +122,97 @@ const Browse = () => {
     return () => clearInterval(interval);
   }, [bannerImages.length]);
 
-  // Mock data for demonstration
-  const items = [
-    {
-      id: 1,
-      title: "Vintage Denim Jacket",
-      brand: "Levi's",
-      size: "M",
-      condition: "Excellent",
-      price: 450,
-      points: 25,
-      image:
-        "https://images.unsplash.com/photo-1544966503-7ba9043d5ada?w=400&h=400&fit=crop",
-      tags: ["Vintage", "Denim", "Casual"],
-      rating: 4.8,
-      seller: "FashionLover23",
-      isLiked: false,
-      quality: "high",
-    },
-    {
-      id: 2,
-      title: "Summer Floral Dress",
-      brand: "Zara",
-      size: "S",
-      condition: "Good",
-      price: 280,
-      points: 18,
-      image:
-        "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&h=400&fit=crop",
-      tags: ["Summer", "Floral", "Dress"],
-      rating: 4.5,
-      seller: "StyleGuru",
-      isLiked: true,
-      quality: "medium",
-    },
-    {
-      id: 3,
-      title: "Designer Leather Bag",
-      brand: "Coach",
-      size: "One Size",
-      condition: "Like New",
-      price: 1200,
-      points: 65,
-      image:
-        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",
-      tags: ["Designer", "Leather", "Accessories"],
-      rating: 5.0,
-      seller: "LuxuryCloset",
-      isLiked: false,
-      quality: "premium",
-    },
-    {
-      id: 4,
-      title: "Casual White Sneakers",
-      brand: "Adidas",
-      size: "9",
-      condition: "Good",
-      price: 320,
-      points: 20,
-      image:
-        "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop",
-      tags: ["Sneakers", "Casual", "Sports"],
-      rating: 4.2,
-      seller: "SneakerHead",
-      isLiked: false,
-      quality: "medium",
-    },
-    {
-      id: 5,
-      title: "Wool Winter Coat",
-      brand: "H&M",
-      size: "L",
-      condition: "Excellent",
-      price: 380,
-      points: 22,
-      image:
-        "https://images.unsplash.com/photo-1544441893-675973e31985?w=400&h=400&fit=crop",
-      tags: ["Winter", "Wool", "Coat"],
-      rating: 4.6,
-      seller: "WinterWardrobe",
-      isLiked: true,
-      quality: "high",
-    },
-    {
-      id: 6,
-      title: "Silk Formal Shirt",
-      brand: "Ralph Lauren",
-      size: "M",
-      condition: "Like New",
-      price: 650,
-      points: 35,
-      image:
-        "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400&h=400&fit=crop",
-      tags: ["Formal", "Silk", "Business"],
-      rating: 4.9,
-      seller: "ProfessionalStyle",
-      isLiked: false,
-      quality: "premium",
-    },
-  ];
+  // Fetch items from API
+  const fetchItems = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params: any = {
+        page: currentPage,
+        limit: 12,
+        sortBy,
+        sortOrder,
+      };
+
+      if (searchTerm) params.search = searchTerm;
+      if (selectedCategory && selectedCategory !== "All Categories") {
+        params.category = selectedCategory;
+      }
+      if (selectedCondition) params.condition = selectedCondition;
+
+      const response: ApiResponse = await itemsApi.getItems(params);
+
+      if (response.success) {
+        const itemsWithCalculatedData = response.data.map((item) => ({
+          ...item,
+          points: Math.floor(item.price * 0.1), // Calculate points as 10% of price
+          isLiked: user ? item.likedBy?.includes(user.id) : false,
+        }));
+
+        setItems(itemsWithCalculatedData);
+        setTotalItems(response.pagination?.total || 0);
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof ApiError ? err.message : "Failed to fetch items";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch items on component mount and when filters change
+  useEffect(() => {
+    fetchItems();
+  }, [
+    currentPage,
+    searchTerm,
+    selectedCategory,
+    selectedCondition,
+    sortBy,
+    sortOrder,
+  ]);
+
+  // Handle like/unlike item
+  const handleLikeItem = async (itemId: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to like items",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await itemsApi.likeItem(itemId);
+
+      // Update the item in the local state
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item._id === itemId
+            ? {
+                ...item,
+                isLiked: !item.isLiked,
+                likes: item.isLiked ? item.likes - 1 : item.likes + 1,
+              }
+            : item,
+        ),
+      );
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to update like status",
+        variant: "destructive",
+      });
+    }
+  };
 
   const categories = [
     "All Categories",
@@ -471,8 +520,16 @@ const Browse = () => {
           <div className="flex-1">
             <div className="mb-4 flex items-center justify-between">
               <p className="text-text-secondary">
-                Showing {items.length} of {items.length} items
+                {loading
+                  ? "Loading..."
+                  : `Showing ${items.length} of ${totalItems} items`}
               </p>
+              {error && (
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-sm">{error}</span>
+                </div>
+              )}
             </div>
 
             {viewMode === "grid" ? (
