@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,8 @@ import {
 } from "lucide-react";
 
 const Index = () => {
+  const { isAuthenticated } = useAuth();
+
   // Auto-changing hero images
   const heroImages = [
     {
@@ -216,12 +219,23 @@ const Index = () => {
                   description:
                     "All items are verified by our community. Shop with confidence knowing every piece is authentic.",
                 },
-                {
-                  icon: Coins,
-                  title: "Multiple Ways to Pay",
-                  description:
-                    "Use ReWear Points, swap directly, or pay with traditional currency. Your choice!",
-                },
+                ...(isAuthenticated
+                  ? [
+                      {
+                        icon: Coins,
+                        title: "Multiple Ways to Pay",
+                        description:
+                          "Use ReWear Points, swap directly, or pay with traditional currency. Your choice!",
+                      },
+                    ]
+                  : [
+                      {
+                        icon: Heart,
+                        title: "Quality Community",
+                        description:
+                          "Join a trusted community of fashion lovers. Rate items and sellers to maintain quality.",
+                      },
+                    ]),
               ].map((feature, index) => {
                 const Icon = feature.icon;
                 return (
@@ -436,8 +450,9 @@ const Index = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 text-lg px-8 py-6 w-full sm:w-auto"
+                className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm text-lg px-8 py-6 w-full sm:w-auto transition-all duration-300 hover:border-white/50"
               >
+                <ShoppingBag className="h-5 w-5 mr-2" />
                 Explore Items
               </Button>
             </Link>
