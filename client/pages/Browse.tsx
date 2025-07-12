@@ -34,6 +34,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DemoRemovalNotice } from "@/components/DemoRemovalNotice";
 
 interface Item {
   _id: string;
@@ -315,6 +316,10 @@ const Browse = () => {
       </motion.section>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Demo Removal Notice */}
+        <div className="mb-8">
+          <DemoRemovalNotice />
+        </div>
         {/* Browse Controls */}
         <motion.div
           className="flex flex-col lg:flex-row gap-4 mb-8"
