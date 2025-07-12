@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 
-// Mock data - Start with clean state
+// Mock data - Realistic fake data for admin panel
 const mockUsers = [
   {
     id: "admin-1",
@@ -12,7 +12,8 @@ const mockUsers = [
     points: 1000,
     level: "Expert",
     role: "admin",
-    avatar: "",
+    avatar:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
     isVerified: true,
     isActive: true,
     totalItemsSold: 0,
@@ -21,10 +22,334 @@ const mockUsers = [
     createdAt: new Date().toISOString(),
     lastActive: new Date().toISOString(),
   },
+  {
+    id: "user-1",
+    name: "Sarah Johnson",
+    email: "sarah.johnson@email.com",
+    phone: "9876543210",
+    points: 2847,
+    level: "Expert",
+    role: "user",
+    avatar:
+      "https://images.unsplash.com/photo-1494790108755-2616b612b8c5?w=150&h=150&fit=crop&crop=face",
+    isVerified: true,
+    isActive: true,
+    totalItemsSold: 42,
+    totalItemsBought: 28,
+    rating: { average: 4.8, count: 156 },
+    createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
+    lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "user-2",
+    name: "Michael Chen",
+    email: "michael.chen@email.com",
+    phone: "9876543211",
+    points: 1923,
+    level: "Advanced",
+    role: "user",
+    avatar:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    isVerified: true,
+    isActive: true,
+    totalItemsSold: 31,
+    totalItemsBought: 45,
+    rating: { average: 4.6, count: 98 },
+    createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
+    lastActive: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "user-3",
+    name: "Emma Rodriguez",
+    email: "emma.rodriguez@email.com",
+    phone: "9876543212",
+    points: 3456,
+    level: "Master",
+    role: "user",
+    avatar:
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    isVerified: true,
+    isActive: true,
+    totalItemsSold: 67,
+    totalItemsBought: 23,
+    rating: { average: 4.9, count: 234 },
+    createdAt: new Date(Date.now() - 240 * 24 * 60 * 60 * 1000).toISOString(),
+    lastActive: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "user-4",
+    name: "David Kumar",
+    email: "david.kumar@email.com",
+    phone: "9876543213",
+    points: 892,
+    level: "Intermediate",
+    role: "user",
+    avatar:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    isVerified: true,
+    isActive: true,
+    totalItemsSold: 18,
+    totalItemsBought: 34,
+    rating: { average: 4.5, count: 67 },
+    createdAt: new Date(Date.now() - 85 * 24 * 60 * 60 * 1000).toISOString(),
+    lastActive: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "user-5",
+    name: "Lisa Thompson",
+    email: "lisa.thompson@email.com",
+    phone: "9876543214",
+    points: 1567,
+    level: "Advanced",
+    role: "user",
+    avatar:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    isVerified: true,
+    isActive: true,
+    totalItemsSold: 29,
+    totalItemsBought: 41,
+    rating: { average: 4.7, count: 112 },
+    createdAt: new Date(Date.now() - 156 * 24 * 60 * 60 * 1000).toISOString(),
+    lastActive: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "user-6",
+    name: "Alex Morgan",
+    email: "alex.morgan@email.com",
+    phone: "9876543215",
+    points: 634,
+    level: "Beginner",
+    role: "user",
+    avatar:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    isVerified: false,
+    isActive: true,
+    totalItemsSold: 8,
+    totalItemsBought: 12,
+    rating: { average: 4.3, count: 23 },
+    createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+    lastActive: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+  },
 ];
 
-// Start with empty items array - no dummy data
-const mockItems: any[] = [];
+// Realistic fake items data
+const mockItems: any[] = [
+  // Pending items
+  {
+    id: "pending-1",
+    _id: "pending-1",
+    title: "Vintage Levi's 501 Jeans",
+    description:
+      "Classic 501s in excellent condition. Authentic vintage from the 90s with perfect fade. Size 32x34. These have been my go-to jeans for years but they no longer fit.",
+    category: "Bottoms",
+    brand: "Levi's",
+    size: "32x34",
+    color: "Indigo Blue",
+    condition: "Excellent",
+    price: 85,
+    originalPrice: 120,
+    pointsValue: 42,
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&h=600&fit=crop",
+        isPrimary: true,
+      },
+    ],
+    seller: {
+      id: "user-2",
+      name: "Michael Chen",
+      email: "michael.chen@email.com",
+      avatar:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      rating: { average: 4.6, count: 98 },
+    },
+    status: "pending",
+    qualityBadge: "high",
+    views: 0,
+    likes: 0,
+    featured: false,
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "pending-2",
+    _id: "pending-2",
+    title: "Patagonia Down Jacket",
+    description:
+      "Lightweight down jacket perfect for hiking and outdoor activities. Barely used, like new condition. Great for layering in cold weather.",
+    category: "Outerwear",
+    brand: "Patagonia",
+    size: "Medium",
+    color: "Forest Green",
+    condition: "Like New",
+    price: 150,
+    originalPrice: 250,
+    pointsValue: 75,
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5e?w=500&h=600&fit=crop",
+        isPrimary: true,
+      },
+    ],
+    seller: {
+      id: "user-3",
+      name: "Emma Rodriguez",
+      email: "emma.rodriguez@email.com",
+      avatar:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      rating: { average: 4.9, count: 234 },
+    },
+    status: "pending",
+    qualityBadge: "premium",
+    views: 0,
+    likes: 0,
+    featured: false,
+    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "pending-3",
+    _id: "pending-3",
+    title: "Nike Air Force 1 White",
+    description:
+      "Classic white AF1s in good condition. Some creasing but still plenty of life left. Size 9.5 US. Perfect for casual wear.",
+    category: "Shoes",
+    brand: "Nike",
+    size: "9.5",
+    color: "White",
+    condition: "Good",
+    price: 65,
+    originalPrice: 110,
+    pointsValue: 32,
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&h=600&fit=crop",
+        isPrimary: true,
+      },
+    ],
+    seller: {
+      id: "user-1",
+      name: "Sarah Johnson",
+      email: "sarah.johnson@email.com",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108755-2616b612b8c5?w=150&h=150&fit=crop&crop=face",
+      rating: { average: 4.8, count: 156 },
+    },
+    status: "pending",
+    qualityBadge: "medium",
+    views: 0,
+    likes: 0,
+    featured: false,
+    createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+  },
+  // Flagged items
+  {
+    id: "flagged-1",
+    _id: "flagged-1",
+    title: "Designer Handbag (Replica)",
+    description:
+      "High quality replica of designer handbag. Looks exactly like the original and great quality.",
+    category: "Accessories",
+    brand: "Unknown",
+    size: "One Size",
+    color: "Black",
+    condition: "Like New",
+    price: 45,
+    originalPrice: 60,
+    pointsValue: 22,
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=600&fit=crop",
+        isPrimary: true,
+      },
+    ],
+    seller: {
+      id: "user-6",
+      name: "Alex Morgan",
+      email: "alex.morgan@email.com",
+      avatar:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      rating: { average: 4.3, count: 23 },
+    },
+    status: "flagged",
+    qualityBadge: "basic",
+    views: 234,
+    likes: 12,
+    featured: false,
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    flaggedReasons: ["Counterfeit item", "Misleading description"],
+  },
+  // Active approved items
+  {
+    id: "active-1",
+    _id: "active-1",
+    title: "Zara Wool Coat",
+    description:
+      "Beautiful wool coat in camel color. Perfect for fall/winter season. Worn only a few times.",
+    category: "Outerwear",
+    brand: "Zara",
+    size: "Small",
+    color: "Camel",
+    condition: "Excellent",
+    price: 95,
+    originalPrice: 160,
+    pointsValue: 47,
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1594633313593-bab3825d0caf?w=500&h=600&fit=crop",
+        isPrimary: true,
+      },
+    ],
+    seller: {
+      id: "user-5",
+      name: "Lisa Thompson",
+      email: "lisa.thompson@email.com",
+      avatar:
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+      rating: { average: 4.7, count: 112 },
+    },
+    status: "active",
+    qualityBadge: "high",
+    views: 342,
+    likes: 28,
+    featured: true,
+    createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  // Sold items
+  {
+    id: "sold-1",
+    _id: "sold-1",
+    title: "H&M Floral Dress",
+    description:
+      "Pretty summer dress with floral print. Size Medium. Great for casual or semi-formal occasions.",
+    category: "Dresses",
+    brand: "H&M",
+    size: "Medium",
+    color: "Floral",
+    condition: "Good",
+    price: 35,
+    originalPrice: 55,
+    pointsValue: 17,
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=500&h=600&fit=crop",
+        isPrimary: true,
+      },
+    ],
+    seller: {
+      id: "user-4",
+      name: "David Kumar",
+      email: "david.kumar@email.com",
+      avatar:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+      rating: { average: 4.5, count: 67 },
+    },
+    status: "sold",
+    qualityBadge: "medium",
+    views: 187,
+    likes: 15,
+    featured: false,
+    createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+];
 
 // Keep track of logged-in user sessions
 const userSessions = new Map();
