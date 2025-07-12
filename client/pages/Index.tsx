@@ -1,5 +1,6 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,9 +15,42 @@ import {
   Gift,
   ArrowRight,
   CheckCircle,
+  Sparkles,
+  Globe,
+  Shield,
+  Coins,
 } from "lucide-react";
 
 const Index = () => {
+  // Auto-changing hero images
+  const heroImages = [
+    {
+      url: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&h=600&fit=crop",
+      alt: "Sustainable fashion collection",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=600&fit=crop",
+      alt: "Vintage clothing store",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&h=600&fit=crop",
+      alt: "Fashion exchange community",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&h=600&fit=crop",
+      alt: "Pre-loved designer clothes",
+    },
+  ];
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -40,159 +74,200 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-background via-surface to-secondary/20 py-20 md:py-32">
-        <div className="container mx-auto px-4">
+      {/* Hero Section with Auto-changing Images */}
+      <section className="relative overflow-hidden min-h-screen flex items-center">
+        {/* Background Image Carousel */}
+        <div className="absolute inset-0 z-0">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentImageIndex}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+              className="absolute inset-0"
+            >
+              <img
+                src={heroImages[currentImageIndex].url}
+                alt={heroImages[currentImageIndex].alt}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60"></div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 container mx-auto px-4 py-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
-              className="space-y-8"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
+              className="text-center lg:text-left"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div className="space-y-4">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  <Badge
-                    variant="secondary"
-                    className="bg-primary/10 text-primary border-primary/20"
-                  >
-                    <Leaf className="h-3 w-3 mr-1" />
-                    Sustainable Fashion Platform
-                  </Badge>
-                </motion.div>
-                <motion.h1
-                  className="text-4xl md:text-6xl font-bold text-foreground leading-tight"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.3 }}
-                >
-                  Fashion that <span className="text-primary">Cares</span> for
-                  Tomorrow
-                </motion.h1>
-                <motion.p
-                  className="text-lg text-text-secondary max-w-lg"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.5 }}
-                >
-                  Join thousands of fashion lovers exchanging, redeeming, and
-                  discovering pre-loved clothing. Reduce waste, earn points, and
-                  build a sustainable wardrobe.
-                </motion.p>
-              </div>
-
               <motion.div
-                className="flex flex-col sm:flex-row gap-4"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="mb-6"
+              >
+                <Badge className="bg-primary/20 text-primary border-primary/30 backdrop-blur-sm mb-4">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Welcome to the Future of Fashion
+                </Badge>
+              </motion.div>
+
+              <motion.h1
+                className="text-4xl md:text-7xl font-bold text-white leading-tight mb-6"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+              >
+                Turn Your Closet Into
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
+                  Sustainable Rewards
+                </span>
+              </motion.h1>
+
+              <motion.p
+                className="text-lg md:text-xl text-gray-200 max-w-2xl mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                Join 25,000+ fashion lovers earning rewards by exchanging
+                pre-loved clothes. Reduce waste, discover unique pieces, and
+                build a sustainable wardrobe that gives back to the planet.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                className="flex flex-col sm:flex-row gap-4 mb-8"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.7 }}
               >
-                <Link to="/browse">
+                <Link to="/register">
                   <Button
                     size="lg"
-                    className="bg-primary hover:bg-hover w-full sm:w-auto"
+                    className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white border-0 text-lg px-8 py-6 w-full sm:w-auto"
                   >
-                    Start Exploring
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    Start Earning Rewards
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-border hover:bg-surface"
-                >
-                  How It Works
-                </Button>
+                <Link to="/login">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm text-lg px-8 py-6 w-full sm:w-auto"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
               </motion.div>
 
-              {/* Stats */}
+              {/* Trust Indicators */}
               <motion.div
-                className="grid grid-cols-3 gap-6 pt-8"
+                className="grid grid-cols-3 gap-6 text-center"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.9 }}
               >
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">50K+</div>
-                  <div className="text-sm text-text-muted">Items Exchanged</div>
+                <div>
+                  <div className="text-2xl font-bold text-white">50K+</div>
+                  <div className="text-sm text-gray-300">Items Exchanged</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">25K+</div>
-                  <div className="text-sm text-text-muted">Active Users</div>
+                <div>
+                  <div className="text-2xl font-bold text-white">25K+</div>
+                  <div className="text-sm text-gray-300">Happy Users</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">80%</div>
-                  <div className="text-sm text-text-muted">Waste Reduction</div>
+                <div>
+                  <div className="text-2xl font-bold text-white">80%</div>
+                  <div className="text-sm text-gray-300">Waste Reduced</div>
                 </div>
               </motion.div>
             </motion.div>
 
-            {/* Hero Image/Mockup */}
+            {/* Right Side - Value Props */}
             <motion.div
-              className="relative"
+              className="space-y-6"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <div className="bg-surface rounded-2xl p-8 shadow-lg border border-border">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                      <Recycle className="h-4 w-4 text-primary-foreground" />
+              {[
+                {
+                  icon: Recycle,
+                  title: "Earn ReWear Points",
+                  description:
+                    "Get points for every item you list, swap, or rate. Redeem points for amazing fashion finds.",
+                },
+                {
+                  icon: Globe,
+                  title: "Global Fashion Community",
+                  description:
+                    "Connect with fashion lovers worldwide. Discover unique pieces from different cultures.",
+                },
+                {
+                  icon: Shield,
+                  title: "Quality Guaranteed",
+                  description:
+                    "All items are verified by our community. Shop with confidence knowing every piece is authentic.",
+                },
+                {
+                  icon: Coins,
+                  title: "Multiple Ways to Pay",
+                  description:
+                    "Use ReWear Points, swap directly, or pay with traditional currency. Your choice!",
+                },
+              ].map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <motion.div
+                    key={index}
+                    className="flex items-start space-x-4 bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20"
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="flex-shrink-0">
+                      <Icon className="h-8 w-8 text-green-400" />
                     </div>
-                    <span className="font-semibold">ReWear</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <motion.div
-                      className="bg-background rounded-lg p-3 border border-border"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <div className="h-24 bg-muted rounded-md mb-2"></div>
-                      <div className="text-xs font-medium">Vintage Denim</div>
-                      <div className="text-xs text-text-muted">
-                        ₹250 • 15 pts
-                      </div>
-                    </motion.div>
-                    <motion.div
-                      className="bg-background rounded-lg p-3 border border-border"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <div className="h-24 bg-muted rounded-md mb-2"></div>
-                      <div className="text-xs font-medium">Summer Dress</div>
-                      <div className="text-xs text-text-muted">
-                        ₹180 • 12 pts
-                      </div>
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
-              {/* Floating Elements */}
-              <motion.div
-                className="absolute -top-4 -right-4 bg-primary text-primary-foreground rounded-full p-3 shadow-lg"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Heart className="h-4 w-4" />
-              </motion.div>
-              <motion.div
-                className="absolute -bottom-4 -left-4 bg-background border border-border rounded-full p-3 shadow-lg"
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-              >
-                <Star className="h-4 w-4 text-yellow-500" />
-              </motion.div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-2">
+                        {feature.title}
+                      </h3>
+                      <p className="text-gray-300 text-sm">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </motion.div>
+          </div>
+        </div>
+
+        {/* Image Indicators */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
+          <div className="flex space-x-2">
+            {heroImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex
+                    ? "bg-white w-8"
+                    : "bg-white/40 hover:bg-white/60"
+                }`}
+              />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* How It Works Section */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <motion.div
@@ -202,11 +277,11 @@ const Index = () => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              How ReWear Works
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
+              Start Your Sustainable Journey
             </h2>
             <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-              Simple steps to start your sustainable fashion journey
+              Three simple steps to transform your wardrobe and earn rewards
             </p>
           </motion.div>
 
@@ -219,41 +294,49 @@ const Index = () => {
           >
             {[
               {
+                step: "1",
                 icon: ShoppingBag,
-                title: "Upload & List",
+                title: "List Your Items",
                 description:
-                  "Upload photos of your pre-loved clothes with detailed descriptions and earn points for approved listings.",
+                  "Upload photos of clothes you no longer wear. Add descriptions and earn points for quality listings.",
               },
               {
-                icon: Recycle,
-                title: "Exchange & Redeem",
+                step: "2",
+                icon: Users,
+                title: "Connect & Exchange",
                 description:
-                  "Swap items with others, redeem with ReWear Points, or purchase using INR through secure payments.",
+                  "Browse items from our community. Swap directly, redeem with points, or purchase with INR.",
               },
               {
+                step: "3",
                 icon: Gift,
-                title: "Earn Rewards",
+                title: "Earn & Repeat",
                 description:
-                  "Get points for quality uploads, successful swaps, and referrals. Build your sustainable wardrobe affordably.",
+                  "Get points for every exchange, referral, and quality rating. Level up your sustainable impact!",
               },
-            ].map((feature, index) => {
-              const Icon = feature.icon;
+            ].map((step, index) => {
+              const Icon = step.icon;
               return (
-                <motion.div key={index} variants={itemVariants}>
-                  <Card className="border-border hover:shadow-lg transition-shadow h-full">
-                    <CardContent className="p-6 text-center">
-                      <motion.div
-                        className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4"
-                        whileHover={{ scale: 1.1 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <Icon className="h-6 w-6 text-primary" />
-                      </motion.div>
-                      <h3 className="text-xl font-semibold mb-2">
-                        {feature.title}
+                <motion.div
+                  key={index}
+                  variants={itemVariants}
+                  className="text-center"
+                >
+                  <Card className="border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gradient-to-br from-background to-surface">
+                    <CardContent className="p-8">
+                      <div className="relative mb-6">
+                        <div className="h-20 w-20 bg-gradient-to-br from-primary to-primary/60 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Icon className="h-10 w-10 text-primary-foreground" />
+                        </div>
+                        <div className="absolute -top-2 -right-2 h-8 w-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                          {step.step}
+                        </div>
+                      </div>
+                      <h3 className="text-xl font-semibold mb-4 text-foreground">
+                        {step.title}
                       </h3>
-                      <p className="text-text-secondary">
-                        {feature.description}
+                      <p className="text-text-secondary leading-relaxed">
+                        {step.description}
                       </p>
                     </CardContent>
                   </Card>
@@ -264,210 +347,119 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-20 bg-surface">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                Why Choose ReWear?
-              </h2>
-              <div className="space-y-4">
-                {[
-                  {
-                    title: "Sustainable Impact",
-                    description:
-                      "Reduce textile waste and promote circular fashion practices.",
-                  },
-                  {
-                    title: "Community Driven",
-                    description:
-                      "Connect with like-minded fashion enthusiasts in your area.",
-                  },
-                  {
-                    title: "Reward System",
-                    description:
-                      "Earn points for every contribution to the platform.",
-                  },
-                  {
-                    title: "Quality Assurance",
-                    description:
-                      "Admin-approved listings ensure high-quality exchanges.",
-                  },
-                ].map((benefit, index) => (
-                  <motion.div
-                    key={index}
-                    className="flex items-start space-x-3"
-                    initial={{ opacity: 0, x: -30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                  >
-                    <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
-                      <h4 className="font-semibold">{benefit.title}</h4>
-                      <p className="text-text-secondary text-sm">
-                        {benefit.description}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="grid grid-cols-2 gap-6"
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              {[
-                { icon: TrendingUp, value: "95%", label: "User Satisfaction" },
-                { icon: Users, value: "10K+", label: "Monthly Swaps" },
-                { icon: Leaf, value: "5M+", label: "CO₂ Saved (kg)" },
-                { icon: Star, value: "4.8", label: "App Rating" },
-              ].map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    <Card className="border-border">
-                      <CardContent className="p-6 text-center">
-                        <Icon className="h-8 w-8 text-primary mx-auto mb-3" />
-                        <div className="text-2xl font-bold text-foreground">
-                          {stat.value}
-                        </div>
-                        <div className="text-sm text-text-muted">
-                          {stat.label}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <motion.section
-        className="py-20 bg-primary text-primary-foreground"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Transform Your Wardrobe?
-          </h2>
-          <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
-            Join thousands of users creating a more sustainable fashion future.
-            Start exchanging, earning points, and discovering amazing pre-loved
-            clothes today.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              variant="secondary"
-              className="bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-            >
-              Sign Up Free
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
-            >
-              Watch Demo
-            </Button>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* Footer */}
-      <footer className="bg-background border-t border-border py-12">
+      {/* Social Proof Section */}
+      <section className="py-20 bg-gradient-to-r from-surface to-secondary/20">
         <div className="container mx-auto px-4">
           <motion.div
-            className="grid md:grid-cols-4 gap-8"
+            className="text-center mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                  <Recycle className="h-5 w-5 text-primary-foreground" />
-                </div>
-                <span className="text-xl font-bold">ReWear</span>
-              </div>
-              <p className="text-text-secondary text-sm">
-                Building a sustainable fashion future, one exchange at a time.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-3">Platform</h4>
-              <div className="space-y-2 text-sm text-text-secondary">
-                <Link to="/browse" className="block hover:text-foreground">
-                  Browse Items
-                </Link>
-                <Link to="/sell" className="block hover:text-foreground">
-                  List Items
-                </Link>
-                <Link
-                  to="/how-it-works"
-                  className="block hover:text-foreground"
-                >
-                  How It Works
-                </Link>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-3">Support</h4>
-              <div className="space-y-2 text-sm text-text-secondary">
-                <Link to="/help" className="block hover:text-foreground">
-                  Help Center
-                </Link>
-                <Link to="/contact" className="block hover:text-foreground">
-                  Contact Us
-                </Link>
-                <Link to="/safety" className="block hover:text-foreground">
-                  Safety Tips
-                </Link>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-3">Company</h4>
-              <div className="space-y-2 text-sm text-text-secondary">
-                <Link to="/about" className="block hover:text-foreground">
-                  About Us
-                </Link>
-                <Link to="/careers" className="block hover:text-foreground">
-                  Careers
-                </Link>
-                <Link to="/press" className="block hover:text-foreground">
-                  Press
-                </Link>
-              </div>
-            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
+              Join Thousands of Happy Users
+            </h2>
+            <p className="text-lg text-text-secondary max-w-2xl mx-auto">
+              Real people, real stories, real impact on the planet
+            </p>
           </motion.div>
-          <div className="border-t border-border mt-8 pt-8 text-center text-sm text-text-muted">
-            <p>© 2024 ReWear. All rights reserved.</p>
+
+          <motion.div
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            {[
+              { icon: TrendingUp, value: "95%", label: "User Satisfaction" },
+              { icon: Users, value: "25K+", label: "Active Community" },
+              { icon: Leaf, value: "5M+", label: "CO₂ Saved (kg)" },
+              { icon: Star, value: "4.9", label: "App Rating" },
+            ].map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <motion.div
+                  key={index}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Card className="border-border bg-background/80 backdrop-blur-sm">
+                    <CardContent className="p-6 text-center">
+                      <Icon className="h-10 w-10 text-primary mx-auto mb-4" />
+                      <div className="text-3xl font-bold text-foreground mb-2">
+                        {stat.value}
+                      </div>
+                      <div className="text-sm text-text-muted">
+                        {stat.label}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <motion.section
+        className="py-20 bg-gradient-to-r from-primary via-primary/90 to-primary text-primary-foreground relative overflow-hidden"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-blue-600/20"></div>
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">
+            Ready to Make Fashion Sustainable?
+          </h2>
+          <p className="text-lg md:text-xl opacity-90 mb-8 max-w-3xl mx-auto">
+            Join our community today and start earning rewards while making a
+            positive impact on the planet. Every item exchanged is a step
+            towards a more sustainable future.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/register">
+              <Button
+                size="lg"
+                variant="secondary"
+                className="bg-white text-primary hover:bg-gray-100 text-lg px-8 py-6 w-full sm:w-auto"
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Link to="/browse">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10 text-lg px-8 py-6 w-full sm:w-auto"
+              >
+                Explore Items
+              </Button>
+            </Link>
+          </div>
+
+          {/* Trust badges */}
+          <div className="mt-12 flex flex-wrap justify-center items-center gap-8 opacity-75">
+            <div className="flex items-center space-x-2">
+              <Shield className="h-5 w-5" />
+              <span className="text-sm">Secure Payments</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-5 w-5" />
+              <span className="text-sm">Verified Items</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Heart className="h-5 w-5" />
+              <span className="text-sm">Community Approved</span>
+            </div>
           </div>
         </div>
-      </footer>
+      </motion.section>
     </div>
   );
 };
