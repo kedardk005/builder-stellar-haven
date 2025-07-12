@@ -29,6 +29,11 @@ import {
   ArrowLeftRight,
   Eye,
   Flag,
+  ArrowRightLeft,
+  Coins,
+  CreditCard,
+  Gift,
+  DollarSign,
 } from "lucide-react";
 
 interface ProductData {
