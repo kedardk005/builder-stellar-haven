@@ -230,6 +230,24 @@ export function createServer() {
         item.qualityBadge = qualityBadge;
       }
 
+      // Award bonus points to seller for approved item
+      const seller = mockUsers.find((u) => u.id === item.seller.id);
+      if (seller) {
+        let bonusPoints = 0;
+        // Award bonus for high-quality items
+        if (qualityBadge === "premium") {
+          bonusPoints = 3;
+        } else if (qualityBadge === "high") {
+          bonusPoints = 2;
+        } else if (qualityBadge === "medium") {
+          bonusPoints = 1;
+        }
+
+        if (bonusPoints > 0) {
+          seller.points += bonusPoints;
+        }
+      }
+
       res.json({
         success: true,
         message: "Item approved successfully",
