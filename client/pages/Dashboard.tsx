@@ -111,7 +111,7 @@ const Dashboard = () => {
   };
 
   // Mock purchases data
-  // For now, no purchases data - can be added later
+    // For now, no purchases data - can be added later
   const myPurchases = [];
 
   return (
@@ -266,8 +266,18 @@ const Dashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {myListings.map((item, index) => (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {loading ? (
+                  <div className="col-span-full flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  </div>
+                ) : myItems.length === 0 ? (
+                  <div className="col-span-full text-center py-8 text-text-muted">
+                    <Package className="h-12 w-12 mx-auto mb-4" />
+                    <p>No items listed yet. Start by listing your first item!</p>
+                  </div>
+                ) : (
+                  myItems.map((item: any, index: number) => (
                   <motion.div
                     key={item.id}
                     initial={{ opacity: 0, scale: 0.9 }}
