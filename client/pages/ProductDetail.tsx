@@ -47,6 +47,8 @@ interface ProductData {
   condition: string;
   price: number;
   originalPrice?: number;
+  pointsValue: number;
+  swapValue: number;
   images: Array<{ url: string; isPrimary: boolean }>;
   seller: {
     _id: string;
@@ -64,6 +66,9 @@ interface ProductData {
   featured: boolean;
   createdAt: string;
   tags?: string[];
+  swapEnabled: boolean;
+  pointsEnabled: boolean;
+  purchaseEnabled: boolean;
   measurements?: {
     chest?: number;
     waist?: number;
