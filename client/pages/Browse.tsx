@@ -329,6 +329,11 @@ const Browse = () => {
                 type="text"
                 placeholder="Search for items, brands, or sellers..."
                 className="pl-10"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // Reset to first page when searching
+                }}
               />
             </div>
           </div>
@@ -341,16 +346,24 @@ const Browse = () => {
               <SlidersHorizontal className="h-4 w-4" />
               Filters
             </Button>
-            <Select defaultValue="newest">
+            <Select
+              value={`${sortBy}-${sortOrder}`}
+              onValueChange={(value) => {
+                const [field, order] = value.split("-");
+                setSortBy(field);
+                setSortOrder(order);
+                setCurrentPage(1);
+              }}
+            >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-                <SelectItem value="points-low">Points: Low to High</SelectItem>
-                <SelectItem value="popular">Most Popular</SelectItem>
+                <SelectItem value="createdAt-desc">Newest</SelectItem>
+                <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                <SelectItem value="views-desc">Most Popular</SelectItem>
+                <SelectItem value="likes-desc">Most Liked</SelectItem>
               </SelectContent>
             </Select>
             <div className="flex border border-border rounded-lg">
@@ -430,7 +443,24 @@ const Browse = () => {
                 <div className="space-y-2">
                   {categories.map((category) => (
                     <div key={category} className="flex items-center space-x-2">
-                      <Checkbox id={category} />
+                      <Checkbox
+                        id={category}
+                        checked={
+                          selectedCategory === category ||
+                          (category === "All Categories" && !selectedCategory)
+                        }
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedCategory(
+                              category === "All Categories" ? "" : category,
+                            );
+                            setCurrentPage(1);
+                          } else {
+                            setSelectedCategory("");
+                            setCurrentPage(1);
+                          }
+                        }}
+                      />
                       <Label
                         htmlFor={category}
                         className="text-sm cursor-pointer"
@@ -470,7 +500,19 @@ const Browse = () => {
                       key={condition}
                       className="flex items-center space-x-2"
                     >
-                      <Checkbox id={condition} />
+                      <Checkbox
+                        id={condition}
+                        checked={selectedCondition === condition}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedCondition(condition);
+                            setCurrentPage(1);
+                          } else {
+                            setSelectedCondition("");
+                            setCurrentPage(1);
+                          }
+                        }}
+                      />
                       <Label
                         htmlFor={condition}
                         className="text-sm cursor-pointer"
