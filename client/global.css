@@ -9,33 +9,41 @@
    * A different format will require also updating the theme in tailwind.config.ts.
   */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* ReWear Light Theme Color Palette */
+    --background: 0 0% 100%; /* Pure White */
+    --foreground: 0 0% 10%; /* Rich Black */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%; /* Pure White */
+    --card-foreground: 0 0% 10%; /* Rich Black */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%; /* Pure White */
+    --popover-foreground: 0 0% 10%; /* Rich Black */
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 0 0% 17%; /* Charcoal Black (Accent/CTA) */
+    --primary-foreground: 0 0% 100%; /* Pure White */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 96%; /* Light Grey */
+    --secondary-foreground: 0 0% 10%; /* Rich Black */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 96%; /* Light Grey */
+    --muted-foreground: 0 0% 44%; /* Medium Grey */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 0 0% 17%; /* Charcoal Black */
+    --accent-foreground: 0 0% 100%; /* Pure White */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 60 60% 31%; /* Red Grey */
+    --destructive-foreground: 0 0% 100%; /* Pure White */
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 88%; /* Soft Grey */
+    --input: 0 0% 88%; /* Soft Grey */
+    --ring: 0 0% 10%; /* Rich Black */
+
+    /* ReWear Custom Colors */
+    --surface: 0 0% 98%; /* Ultra Light Grey */
+    --text-secondary: 0 0% 30%; /* Dark Grey */
+    --text-muted: 0 0% 44%; /* Medium Grey */
+    --disabled: 240 12% 82%; /* Pale Grey */
+    --hover: 0 0% 24%; /* Semi-dark Grey */
 
     --radius: 0.5rem;
 
@@ -57,33 +65,41 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* ReWear Dark Theme (Future Implementation) */
+    --background: 0 0% 10%; /* Rich Black */
+    --foreground: 0 0% 100%; /* Pure White */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 17%; /* Charcoal Black */
+    --card-foreground: 0 0% 100%; /* Pure White */
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 17%; /* Charcoal Black */
+    --popover-foreground: 0 0% 100%; /* Pure White */
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 0 0% 100%; /* Pure White */
+    --primary-foreground: 0 0% 10%; /* Rich Black */
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 24%; /* Semi-dark Grey */
+    --secondary-foreground: 0 0% 100%; /* Pure White */
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 24%; /* Semi-dark Grey */
+    --muted-foreground: 0 0% 70%; /* Light Grey */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 0 0% 100%; /* Pure White */
+    --accent-foreground: 0 0% 10%; /* Rich Black */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 60 60% 50%; /* Red Grey (lighter for dark) */
+    --destructive-foreground: 0 0% 100%; /* Pure White */
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 0 0% 30%; /* Dark Grey */
+    --input: 0 0% 30%; /* Dark Grey */
+    --ring: 0 0% 100%; /* Pure White */
+
+    /* ReWear Dark Custom Colors */
+    --surface: 0 0% 14%; /* Darker surface */
+    --text-secondary: 0 0% 70%; /* Light Grey */
+    --text-muted: 0 0% 60%; /* Medium Light Grey */
+    --disabled: 0 0% 40%; /* Disabled Grey */
+    --hover: 0 0% 30%; /* Lighter hover */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
