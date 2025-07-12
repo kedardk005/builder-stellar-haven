@@ -280,6 +280,119 @@ export function createServer() {
     }
   });
 
+  // Items routes
+  app.get("/api/items", (req, res) => {
+    const { search, category, condition, sortBy } = req.query;
+    let items = [...mockItems];
+
+    // Filter by search
+    if (search) {
+      items = items.filter(
+        (item) =>
+          item.title.toLowerCase().includes(search.toString().toLowerCase()) ||
+          item.description
+            .toLowerCase()
+            .includes(search.toString().toLowerCase()) ||
+          item.brand.toLowerCase().includes(search.toString().toLowerCase()),
+      );
+    }
+
+    // Filter by category
+    if (category) {
+      items = items.filter((item) => item.category === category);
+    }
+
+    // Filter by condition
+    if (condition) {
+      items = items.filter((item) => item.condition === condition);
+    }
+
+    res.json({
+      success: true,
+      data: items,
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: items.length,
+        pages: 1,
+      },
+    });
+  });
+
+  app.get("/api/items/:id", (req, res) => {
+    const { id } = req.params;
+    const item = mockItems.find((i) => i.id === id || i._id === id);
+
+    if (item) {
+      res.json({
+        success: true,
+        data: item,
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: "Item not found",
+      });
+    }
+  });
+
+  app.post("/api/items", mockAuth, (req, res) => {
+    // Mock item creation - in reality this would handle FormData with images
+    const itemData = req.body;
+
+    const newItem = {
+      id: Date.now().toString(),
+      _id: Date.now().toString(),
+      title: itemData.title || "New Item",
+      description: itemData.description || "Item description",
+      category: itemData.category || "Other",
+      brand: itemData.brand || "Unknown",
+      size: itemData.size || "M",
+      color: itemData.color || "Black",
+      condition: itemData.condition || "Good",
+      price: itemData.price || 20,
+      originalPrice: itemData.originalPrice || 50,
+      images: [{ url: "/placeholder.svg", isPrimary: true }], // Mock image
+      seller: req.user || mockUsers[1],
+      status: "pending",
+      qualityBadge: "basic",
+      views: 0,
+      likes: 0,
+      featured: false,
+      createdAt: new Date().toISOString(),
+      flaggedReasons: [],
+    };
+
+    mockItems.push(newItem);
+
+    // Award points for listing an item
+    if (req.user) {
+      req.user.points += 10;
+    }
+
+    res.status(201).json({
+      success: true,
+      message:
+        "Item created successfully. It will be reviewed before going live.",
+      data: newItem,
+    });
+  });
+
+  app.get("/api/items/user/my-items", mockAuth, (req: any, res) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const userItems = mockItems.filter(
+      (item) => item.seller.id === req.user.id,
+    );
+
+    res.json({
+      success: true,
+      data: userItems,
+    });
+  });
+
   // Example API routes
   app.get("/api/ping", (_req, res) => {
     res.json({ message: "Hello from Express server v2!" });
