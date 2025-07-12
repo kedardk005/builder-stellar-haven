@@ -1,6 +1,9 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { itemsApi, ordersApi, ApiError } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,12 +23,64 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  Loader2,
+  AlertCircle,
+  ShoppingCart,
+  Exchange,
+  Eye,
+  Flag,
 } from "lucide-react";
+
+interface ProductData {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  brand: string;
+  size: string;
+  color: string;
+  condition: string;
+  price: number;
+  originalPrice?: number;
+  images: Array<{ url: string; isPrimary: boolean }>;
+  seller: {
+    _id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+    rating: { average: number; count: number };
+    createdAt: string;
+  };
+  status: string;
+  qualityBadge: string;
+  views: number;
+  likes: number;
+  likedBy: string[];
+  featured: boolean;
+  createdAt: string;
+  tags?: string[];
+  measurements?: {
+    chest?: number;
+    waist?: number;
+    length?: number;
+    shoulders?: number;
+    sleeves?: number;
+  };
+}
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+
+  const [product, setProduct] = useState<ProductData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [similarProducts, setSimilarProducts] = useState<ProductData[]>([]);
+  const [orderLoading, setOrderLoading] = useState(false);
 
   // Mock product data
   const product = {
