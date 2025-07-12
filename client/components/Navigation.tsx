@@ -92,14 +92,23 @@ export const Navigation = () => {
               <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full"></span>
             </Button>
 
-            {/* Profile */}
-            <Button variant="ghost" size="sm" className="hidden md:flex">
-              <Avatar className="h-6 w-6">
-                <AvatarImage src="/placeholder-avatar.jpg" />
-                <AvatarFallback className="text-xs">JD</AvatarFallback>
-              </Avatar>
-              <span className="ml-2 text-sm">John Doe</span>
-            </Button>
+            {/* Auth Buttons for New Users */}
+            <div className="hidden md:flex items-center space-x-2">
+              <Link to="/login">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-text-secondary hover:text-foreground"
+                >
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button size="sm" className="bg-primary hover:bg-hover">
+                  Sign Up
+                </Button>
+              </Link>
+            </div>
 
             {/* Mobile Menu Toggle */}
             <Button
@@ -165,14 +174,22 @@ export const Navigation = () => {
                 );
               })}
 
-              {/* Profile */}
+              {/* Auth Links for Mobile */}
               <Link
-                to="/profile"
+                to="/login"
                 className="flex items-center space-x-3 px-2 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface hover:text-foreground transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <User className="h-5 w-5" />
-                <span>Profile</span>
+                <span>Sign In</span>
+              </Link>
+              <Link
+                to="/register"
+                className="flex items-center space-x-3 px-2 py-3 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-hover transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <User className="h-5 w-5" />
+                <span>Sign Up</span>
               </Link>
             </div>
           </div>
