@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema(
   {
@@ -57,6 +59,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["Beginner", "Explorer", "Enthusiast", "Expert", "Master"],
       default: "Beginner",
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin", "moderator"],
+      default: "user",
     },
     totalItemsSold: {
       type: Number,
@@ -163,6 +170,43 @@ userSchema.pre("save", function (next) {
 // Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Generate JWT token
+userSchema.methods.generateToken = function () {
+  return jwt.sign(
+    {
+      id: this._id,
+      email: this.email,
+      role: this.role,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRE || "7d",
+    },
+  );
+};
+
+// Generate verification token
+userSchema.methods.generateVerificationToken = function () {
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+  this.verificationToken = crypto
+    .createHash("sha256")
+    .update(verificationToken)
+    .digest("hex");
+  this.verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  return verificationToken;
+};
+
+// Generate password reset token
+userSchema.methods.generatePasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  return resetToken;
 };
 
 // Add points method
