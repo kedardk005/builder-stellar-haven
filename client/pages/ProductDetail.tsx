@@ -565,36 +565,138 @@ const ProductDetail = () => {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Button
-                      className="flex-1 bg-primary hover:bg-hover"
-                      onClick={handleBuyNow}
-                      disabled={orderLoading || product.seller._id === user?.id}
-                    >
-                      {orderLoading ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                      )}
-                      Buy Now - ₹{product.price}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={handleExchangeWithPoints}
-                      disabled={product.seller._id === user?.id}
-                    >
-                      <Recycle className="h-4 w-4 mr-2" />
-                      Redeem with {Math.floor(product.price * 10)} Points
-                    </Button>
-                    <Button
-                      variant="outline"
-                      disabled={product.seller._id === user?.id}
-                    >
-                      <ArrowLeftRight className="h-4 w-4 mr-2" />
-                      Exchange
-                    </Button>
+                  {/* Exchange Methods */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-foreground">
+                      Get This Item
+                    </h3>
+
+                    {product.seller._id === user?.id ? (
+                      <div className="text-center p-4 bg-surface rounded-lg">
+                        <p className="text-text-muted">This is your own item</p>
+                      </div>
+                    ) : (
+                      <div className="grid gap-4">
+                        {/* 1. Direct Swap */}
+                        {product.swapEnabled && (
+                          <Card className="border-blue-200 bg-blue-50/50">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <ArrowRightLeft className="h-5 w-5 text-white" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-blue-900">
+                                      Direct Swap
+                                    </h4>
+                                    <p className="text-sm text-blue-700">
+                                      Exchange with your item
+                                    </p>
+                                  </div>
+                                </div>
+                                <Button
+                                  onClick={handleSwapRequest}
+                                  disabled={orderLoading}
+                                  className="bg-blue-500 hover:bg-blue-600"
+                                >
+                                  {orderLoading ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <ArrowRightLeft className="h-4 w-4 mr-2" />
+                                  )}
+                                  Request Swap
+                                </Button>
+                              </div>
+                              <p className="text-xs text-blue-600">
+                                Both users gain +3 points after successful swap
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* 2. Redeem with Points */}
+                        {product.pointsEnabled && (
+                          <Card className="border-green-200 bg-green-50/50">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                    <Coins className="h-5 w-5 text-white" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-green-900">
+                                      ReWear Points
+                                    </h4>
+                                    <p className="text-sm text-green-700">
+                                      Use your earned points
+                                    </p>
+                                  </div>
+                                </div>
+                                <Button
+                                  onClick={handlePointsRedemption}
+                                  disabled={
+                                    orderLoading ||
+                                    (user?.points || 0) <
+                                      (product.pointsValue || 3)
+                                  }
+                                  className="bg-green-500 hover:bg-green-600"
+                                >
+                                  {orderLoading ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <Coins className="h-4 w-4 mr-2" />
+                                  )}
+                                  Redeem {product.pointsValue || 3} pts
+                                </Button>
+                              </div>
+                              <p className="text-xs text-green-600">
+                                You have {user?.points || 0} points • Seller
+                                gets +3 points
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* 3. Buy with INR */}
+                        {product.purchaseEnabled && (
+                          <Card className="border-purple-200 bg-purple-50/50">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                                    <CreditCard className="h-5 w-5 text-white" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-purple-900">
+                                      Buy with INR
+                                    </h4>
+                                    <p className="text-sm text-purple-700">
+                                      Secure payment via Razorpay
+                                    </p>
+                                  </div>
+                                </div>
+                                <Button
+                                  onClick={handlePurchase}
+                                  disabled={orderLoading}
+                                  className="bg-purple-500 hover:bg-purple-600"
+                                >
+                                  {orderLoading ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <CreditCard className="h-4 w-4 mr-2" />
+                                  )}
+                                  Buy ₹{product.price}
+                                </Button>
+                              </div>
+                              <p className="text-xs text-purple-600">
+                                Secure payment • Instant delivery coordination
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
