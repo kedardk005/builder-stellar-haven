@@ -246,6 +246,23 @@ const Browse = () => {
             </motion.div>
           </div>
         </div>
+
+        {/* Banner Image Indicators */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+          <div className="flex space-x-2">
+            {bannerImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentBannerIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentBannerIndex
+                    ? "bg-white w-6"
+                    : "bg-white/50 hover:bg-white/70"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
       </motion.section>
 
       <div className="container mx-auto px-4 py-8">
