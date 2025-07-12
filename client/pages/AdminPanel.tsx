@@ -236,13 +236,18 @@ const AdminPanel = () => {
 
   // Load initial data
   useEffect(() => {
-    if (isAdmin) {
-      fetchStats();
-      fetchPendingItems();
-      fetchFlaggedItems();
-      fetchUsers();
+    if (canAccessAdmin) {
+      if (isAdmin) {
+        fetchStats();
+        fetchPendingItems();
+        fetchFlaggedItems();
+        fetchUsers();
+      } else {
+        // For regular users, only fetch their own pending items
+        fetchPendingItems();
+      }
     }
-  }, [isAdmin]);
+  }, [canAccessAdmin, isAdmin]);
 
   // Refetch users when search term changes
   useEffect(() => {
