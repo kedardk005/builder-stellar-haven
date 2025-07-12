@@ -163,8 +163,99 @@ const ProductDetail = () => {
     }
   };
 
-  // Handle buy now
-  const handleBuyNow = async () => {
+  // Handle swap request
+  const handleSwapRequest = async () => {
+    if (!isAuthenticated || !product) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to request swaps",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (product.seller._id === user?.id) {
+      toast({
+        title: "Cannot Swap",
+        description: "You cannot swap with your own item",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setOrderLoading(true);
+      const response = await itemsApi.requestSwap(product._id, {
+        message: "I'd like to swap for this item!",
+      });
+
+      if (response.success) {
+        toast({
+          title: "Swap Request Sent! 🔄",
+          description: "The seller will be notified of your swap request.",
+        });
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof ApiError ? err.message : "Failed to send swap request";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setOrderLoading(false);
+    }
+  };
+
+  // Handle points redemption
+  const handlePointsRedemption = async () => {
+    if (!isAuthenticated || !product) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to use points",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const pointsRequired = product.pointsValue || 3;
+    if (user && user.points < pointsRequired) {
+      toast({
+        title: "Insufficient Points",
+        description: `You need ${pointsRequired} points but only have ${user.points}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setOrderLoading(true);
+      const response = await itemsApi.redeemWithPoints(product._id);
+
+      if (response.success) {
+        toast({
+          title: "Item Redeemed Successfully! 🎉",
+          description: response.message,
+        });
+        // Refresh page or navigate to orders
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof ApiError ? err.message : "Failed to redeem item";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setOrderLoading(false);
+    }
+  };
+
+  // Handle INR purchase
+  const handlePurchase = async () => {
     if (!isAuthenticated || !product) {
       toast({
         title: "Authentication Required",
@@ -185,49 +276,37 @@ const ProductDetail = () => {
 
     try {
       setOrderLoading(true);
-
-      // For now, just show success message
-      // In a real app, this would navigate to checkout
-      toast({
-        title: "Added to Cart",
-        description: "Item has been added to your cart",
+      const response = await itemsApi.purchaseWithINR(product._id, {
+        paymentMethod: "razorpay",
       });
+
+      if (response.success) {
+        toast({
+          title: "Order Created! 💳",
+          description: "Redirecting to payment...",
+        });
+        // In a real app, this would redirect to Razorpay payment
+        // For now, just show success
+        setTimeout(() => {
+          toast({
+            title: "Payment Successful! 🎉",
+            description:
+              "Your order has been confirmed. Check your dashboard for details.",
+          });
+          navigate("/dashboard");
+        }, 2000);
+      }
     } catch (err) {
+      const errorMessage =
+        err instanceof ApiError ? err.message : "Failed to create order";
       toast({
         title: "Error",
-        description: "Failed to process purchase",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setOrderLoading(false);
     }
-  };
-
-  // Handle exchange with points
-  const handleExchangeWithPoints = async () => {
-    if (!isAuthenticated || !product) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to use points",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const pointsRequired = Math.floor(product.price * 10); // 10 points per rupee
-    if (user && user.points < pointsRequired) {
-      toast({
-        title: "Insufficient Points",
-        description: `You need ${pointsRequired} points but only have ${user.points}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Points Exchange",
-      description: `This will cost ${pointsRequired} points. Feature coming soon!`,
-    });
   };
 
   // Fetch data on component mount
