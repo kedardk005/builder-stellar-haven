@@ -55,28 +55,42 @@ export function createServer() {
   app.post("/api/auth/login", (req, res) => {
     const { email, password } = req.body;
 
+    // Find user by email
+    let user = mockUsers.find((u) => u.email === email);
+
     // Simple mock login - accept admin@rewear.com with password "admin"
     if (email === "admin@rewear.com" && password === "admin") {
-      const user = mockUsers.find((u) => u.email === email);
+      if (!user) {
+        user = mockUsers[0]; // Admin user
+      }
+    } else {
+      // For any other user, check if they exist
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "User not found. Please register first.",
+        });
+      }
+      // For simplicity, accept any password for existing users
+    }
+
+    if (user) {
+      // Generate unique token
+      const token = `token-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // Store user session
+      userSessions.set(token, user);
+
       res.json({
         success: true,
         message: "Login successful",
-        token: "mock-jwt-token",
-        user,
-      });
-    } else if (email === "user@rewear.com" && password === "user") {
-      const user = mockUsers.find((u) => u.email === "john@example.com");
-      res.json({
-        success: true,
-        message: "Login successful",
-        token: "mock-jwt-token",
+        token,
         user,
       });
     } else {
       res.status(401).json({
         success: false,
-        message:
-          "Invalid credentials. Try admin@rewear.com/admin or user@rewear.com/user",
+        message: "Invalid credentials",
       });
     }
   });
