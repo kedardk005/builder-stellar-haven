@@ -203,6 +203,17 @@ export const itemsApi = {
     });
     return api.get(`/api/items/user/my-items?${query}`);
   },
+
+  // Exchange methods
+  requestSwap: (
+    itemId: string,
+    data: { message?: string; offeredItemId?: string },
+  ) => api.post(`/api/items/${itemId}/swap`, data),
+
+  redeemWithPoints: (itemId: string) => api.post(`/api/items/${itemId}/redeem`),
+
+  purchaseWithINR: (itemId: string, data: { paymentMethod?: string }) =>
+    api.post(`/api/items/${itemId}/purchase`, data),
 };
 
 // Orders API functions
@@ -238,6 +249,16 @@ export const ordersApi = {
   getOrder: (id: string) => api.get(`/api/orders/${id}`),
 
   cancelOrder: (id: string) => api.put(`/api/orders/${id}/cancel`),
+};
+
+// Auth API functions
+export const authApi = {
+  updateProfile: (data: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    bio?: string;
+  }) => api.put("/api/auth/profile", data),
 };
 
 export { ApiError };

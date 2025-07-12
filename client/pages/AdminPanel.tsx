@@ -132,7 +132,7 @@ interface AdminStats {
 }
 
 const AdminPanel = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [pendingItems, setPendingItems] = useState<Item[]>([]);
   const [flaggedItems, setFlaggedItems] = useState<Item[]>([]);
@@ -150,8 +150,9 @@ const AdminPanel = () => {
   const [pointsReason, setPointsReason] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
 
-  // Check admin access
+  // Check admin access - allow users to see their own items
   const isAdmin = user?.role === "admin" || user?.email?.includes("admin");
+  const canAccessAdmin = isAdmin || isAuthenticated; // Allow all authenticated users
 
   // Fetch admin stats
   const fetchStats = async () => {
@@ -235,13 +236,18 @@ const AdminPanel = () => {
 
   // Load initial data
   useEffect(() => {
-    if (isAdmin) {
-      fetchStats();
-      fetchPendingItems();
-      fetchFlaggedItems();
-      fetchUsers();
+    if (canAccessAdmin) {
+      if (isAdmin) {
+        fetchStats();
+        fetchPendingItems();
+        fetchFlaggedItems();
+        fetchUsers();
+      } else {
+        // For regular users, only fetch their own pending items
+        fetchPendingItems();
+      }
     }
-  }, [isAdmin]);
+  }, [canAccessAdmin, isAdmin]);
 
   // Refetch users when search term changes
   useEffect(() => {
@@ -253,7 +259,7 @@ const AdminPanel = () => {
     }
   }, [searchTerm, isAdmin]);
 
-  if (!isAdmin) {
+  if (!canAccessAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -261,7 +267,7 @@ const AdminPanel = () => {
             <Shield className="h-12 w-12 mx-auto text-destructive mb-4" />
             <CardTitle>Access Denied</CardTitle>
             <CardDescription>
-              You don't have permission to access the admin panel.
+              Please sign in to view your items.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -462,97 +468,113 @@ const AdminPanel = () => {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <Shield className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Admin Panel</h1>
+            <h1 className="text-3xl font-bold">
+              {isAdmin ? "Admin Panel" : "My Items Dashboard"}
+            </h1>
           </div>
           <p className="text-text-secondary">
-            Manage items, users, and platform content
+            {isAdmin
+              ? "Manage items, users, and platform content"
+              : "View and manage your listed items"}
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Pending Items
-              </CardTitle>
-              <Clock className="h-4 w-4 text-text-muted" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading.stats ? (
-                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
-                ) : (
-                  stats?.pendingItems || 0
-                )}
-              </div>
-              <p className="text-xs text-text-muted">Awaiting approval</p>
-            </CardContent>
-          </Card>
+        {/* Stats Cards - Only for admins */}
+        {isAdmin && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Pending Items
+                </CardTitle>
+                <Clock className="h-4 w-4 text-text-muted" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {loading.stats ? (
+                    <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats?.pendingItems || 0
+                  )}
+                </div>
+                <p className="text-xs text-text-muted">Awaiting approval</p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Flagged Content
-              </CardTitle>
-              <Flag className="h-4 w-4 text-destructive" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-destructive">
-                {loading.stats ? (
-                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
-                ) : (
-                  stats?.flaggedItems || 0
-                )}
-              </div>
-              <p className="text-xs text-text-muted">Need attention</p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Flagged Content
+                </CardTitle>
+                <Flag className="h-4 w-4 text-destructive" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-destructive">
+                  {loading.stats ? (
+                    <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats?.flaggedItems || 0
+                  )}
+                </div>
+                <p className="text-xs text-text-muted">Need attention</p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Active Users
-              </CardTitle>
-              <Users className="h-4 w-4 text-text-muted" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading.stats ? (
-                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
-                ) : (
-                  stats?.activeUsers || 0
-                )}
-              </div>
-              <p className="text-xs text-text-muted">Online today</p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Active Users
+                </CardTitle>
+                <Users className="h-4 w-4 text-text-muted" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {loading.stats ? (
+                    <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats?.activeUsers || 0
+                  )}
+                </div>
+                <p className="text-xs text-text-muted">Online today</p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Items</CardTitle>
-              <Package className="h-4 w-4 text-text-muted" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading.stats ? (
-                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
-                ) : (
-                  stats?.totalItems || 0
-                )}
-              </div>
-              <p className="text-xs text-text-muted">Total items</p>
-            </CardContent>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Items
+                </CardTitle>
+                <Package className="h-4 w-4 text-text-muted" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {loading.stats ? (
+                    <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats?.totalItems || 0
+                  )}
+                </div>
+                <p className="text-xs text-text-muted">Total items</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="pending">Pending Approvals</TabsTrigger>
-            <TabsTrigger value="quality">Quality Control</TabsTrigger>
-            <TabsTrigger value="rewards">Points & Rewards</TabsTrigger>
-            <TabsTrigger value="moderation">Content Moderation</TabsTrigger>
+          <TabsList
+            className={`grid w-full ${isAdmin ? "grid-cols-4" : "grid-cols-1"}`}
+          >
+            <TabsTrigger value="pending">
+              {isAdmin ? "Pending Approvals" : "My Items"}
+            </TabsTrigger>
+            {isAdmin && (
+              <>
+                <TabsTrigger value="quality">Quality Control</TabsTrigger>
+                <TabsTrigger value="rewards">Points & Rewards</TabsTrigger>
+                <TabsTrigger value="moderation">Content Moderation</TabsTrigger>
+              </>
+            )}
           </TabsList>
 
           {/* Pending Approvals Tab */}

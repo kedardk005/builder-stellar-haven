@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { itemsApi } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,10 +25,15 @@ import {
   Tag,
   Shirt,
   Search,
+  Loader2,
 } from "lucide-react";
 
 const Sell = () => {
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -40,13 +48,16 @@ const Sell = () => {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    // Simulate image URLs for demo
+    // Store actual files for upload
+    setSelectedFiles([...selectedFiles, ...files]);
+    // Create preview URLs
     const newImages = files.map((file) => URL.createObjectURL(file));
     setSelectedImages([...selectedImages, ...newImages]);
   };
 
   const removeImage = (index: number) => {
     setSelectedImages(selectedImages.filter((_, i) => i !== index));
+    setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
   };
 
   const handleInputChange = (
@@ -58,9 +69,91 @@ const Sell = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Item listing submitted:", formData);
+
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to list an item.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate required fields
+    if (
+      !formData.title ||
+      !formData.category ||
+      !formData.condition ||
+      !formData.price
+    ) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Create FormData for file upload
+      const submitData = new FormData();
+
+      // Add form fields
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value) {
+          submitData.append(key, value);
+        }
+      });
+
+      // Add image files
+      selectedFiles.forEach((file, index) => {
+        submitData.append(`image_${index}`, file);
+      });
+
+      // Submit to API
+      const response = await itemsApi.createItem(submitData);
+
+      if (response.success) {
+        toast({
+          title: "Item Listed Successfully! 🎉",
+          description:
+            "Your item has been submitted for review. You'll earn points once it's approved!",
+        });
+
+        // Reset form
+        setFormData({
+          title: "",
+          description: "",
+          category: "",
+          brand: "",
+          size: "",
+          condition: "",
+          color: "",
+          price: "",
+          points: "",
+        });
+        setSelectedImages([]);
+        setSelectedFiles([]);
+      } else {
+        throw new Error(response.message || "Failed to list item");
+      }
+    } catch (error) {
+      console.error("Error listing item:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to list item. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Mock previous listings for demo
@@ -339,15 +432,35 @@ const Sell = () => {
                         <div className="flex space-x-4 pt-4">
                           <Button
                             type="submit"
+                            disabled={isSubmitting || !isAuthenticated}
                             className="flex-1 bg-primary hover:bg-hover"
                           >
-                            <Package className="h-4 w-4 mr-2" />
-                            List Item
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Listing Item...
+                              </>
+                            ) : (
+                              <>
+                                <Package className="h-4 w-4 mr-2" />
+                                List Item
+                              </>
+                            )}
                           </Button>
-                          <Button variant="outline" className="px-6">
-                            Available/Swap
+                          <Button
+                            variant="outline"
+                            className="px-6"
+                            disabled={isSubmitting}
+                          >
+                            Save Draft
                           </Button>
                         </div>
+
+                        {!isAuthenticated && (
+                          <p className="text-sm text-text-muted mt-2">
+                            Please log in to list an item.
+                          </p>
+                        )}
                       </form>
                     </div>
                   </div>
