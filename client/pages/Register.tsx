@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,24 +11,38 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Recycle, User, Mail, Lock, Phone } from "lucide-react";
 
 const Register = () => {
+  const { register } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     phone: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setError(""); // Clear error when user types
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log("Registration submitted:", formData);
+    setIsLoading(true);
+    setError("");
+
+    try {
+      await register(formData);
+      navigate("/dashboard"); // Redirect to dashboard after successful registration
+    } catch (err) {
+      setError("Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -165,12 +180,19 @@ const Register = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7 }}
                 >
+                  {error && (
+                    <div className="text-sm text-destructive text-center p-2 bg-destructive/10 rounded mb-4">
+                      {error}
+                    </div>
+                  )}
+
                   <Button
                     type="submit"
                     className="w-full bg-primary hover:bg-hover text-primary-foreground"
                     size="lg"
+                    disabled={isLoading}
                   >
-                    Register
+                    {isLoading ? "Creating Account..." : "Register"}
                   </Button>
                 </motion.div>
               </form>
