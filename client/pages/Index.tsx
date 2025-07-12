@@ -164,7 +164,7 @@ const Index = () => {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="border-2 border-white/50 text-white hover:bg-white hover:text-gray-900 backdrop-blur-sm text-lg px-8 py-6 w-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-semibold hover:border-white"
+                    className="border-2 border-white/80 bg-white/10 text-white hover:bg-white/20 hover:border-white backdrop-blur-md text-lg px-8 py-6 w-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-semibold"
                   >
                     Sign In
                   </Button>
@@ -440,7 +440,7 @@ const Index = () => {
               <Button
                 size="lg"
                 variant="secondary"
-                className="bg-white text-primary hover:bg-gray-100 text-lg px-10 py-6 w-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 font-semibold"
+                className="bg-white text-primary hover:bg-gray-100 hover:text-primary text-lg px-10 py-6 w-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 font-semibold"
               >
                 Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -450,7 +450,7 @@ const Index = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-white/50 text-white hover:bg-white hover:text-primary backdrop-blur-sm text-lg px-10 py-6 w-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-semibold hover:border-white"
+                className="border-2 border-white/80 bg-white/10 text-white hover:bg-white/20 hover:border-white backdrop-blur-md text-lg px-10 py-6 w-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-semibold"
               >
                 <ShoppingBag className="h-5 w-5 mr-2" />
                 Explore Items
