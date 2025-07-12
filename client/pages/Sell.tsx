@@ -48,13 +48,16 @@ const Sell = () => {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    // Simulate image URLs for demo
+    // Store actual files for upload
+    setSelectedFiles([...selectedFiles, ...files]);
+    // Create preview URLs
     const newImages = files.map((file) => URL.createObjectURL(file));
     setSelectedImages([...selectedImages, ...newImages]);
   };
 
   const removeImage = (index: number) => {
     setSelectedImages(selectedImages.filter((_, i) => i !== index));
+    setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
   };
 
   const handleInputChange = (
@@ -66,9 +69,91 @@ const Sell = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Item listing submitted:", formData);
+
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to list an item.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate required fields
+    if (
+      !formData.title ||
+      !formData.category ||
+      !formData.condition ||
+      !formData.price
+    ) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Create FormData for file upload
+      const submitData = new FormData();
+
+      // Add form fields
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value) {
+          submitData.append(key, value);
+        }
+      });
+
+      // Add image files
+      selectedFiles.forEach((file, index) => {
+        submitData.append(`image_${index}`, file);
+      });
+
+      // Submit to API
+      const response = await itemsApi.createItem(submitData);
+
+      if (response.success) {
+        toast({
+          title: "Item Listed Successfully! 🎉",
+          description:
+            "Your item has been submitted for review. You'll earn points once it's approved!",
+        });
+
+        // Reset form
+        setFormData({
+          title: "",
+          description: "",
+          category: "",
+          brand: "",
+          size: "",
+          condition: "",
+          color: "",
+          price: "",
+          points: "",
+        });
+        setSelectedImages([]);
+        setSelectedFiles([]);
+      } else {
+        throw new Error(response.message || "Failed to list item");
+      }
+    } catch (error) {
+      console.error("Error listing item:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to list item. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Mock previous listings for demo
