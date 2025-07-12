@@ -2,10 +2,10 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 
-// Mock data
+// Mock data - Start with clean state
 const mockUsers = [
   {
-    id: "1",
+    id: "admin-1",
     name: "Admin User",
     email: "admin@rewear.com",
     phone: "9999999999",
@@ -15,61 +15,19 @@ const mockUsers = [
     avatar: "",
     isVerified: true,
     isActive: true,
-    totalItemsSold: 15,
-    totalItemsBought: 5,
-    rating: { average: 4.8, count: 20 },
-    createdAt: new Date().toISOString(),
-    lastActive: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "9876543210",
-    points: 250,
-    level: "Explorer",
-    role: "user",
-    avatar: "",
-    isVerified: true,
-    isActive: true,
-    totalItemsSold: 3,
-    totalItemsBought: 12,
-    rating: { average: 4.2, count: 15 },
+    totalItemsSold: 0,
+    totalItemsBought: 0,
+    rating: { average: 0, count: 0 },
     createdAt: new Date().toISOString(),
     lastActive: new Date().toISOString(),
   },
 ];
 
-const mockItems = [
-  {
-    id: "1",
-    _id: "1",
-    title: "Vintage Denim Jacket",
-    description: "Classic vintage denim jacket in excellent condition",
-    category: "Jackets",
-    brand: "Levi's",
-    size: "M",
-    color: "Blue",
-    condition: "Excellent",
-    price: 45,
-    originalPrice: 120,
-    images: [{ url: "/placeholder.svg", isPrimary: true }],
-    seller: {
-      id: "2",
-      name: "John Doe",
-      email: "john@example.com",
-      avatar: "",
-      rating: { average: 4.2, count: 15 },
-    },
-    status: "pending",
-    qualityBadge: "medium",
-    views: 23,
-    likes: 5,
-    featured: false,
-    createdAt: new Date().toISOString(),
-    flaggedReasons: [],
-  },
-];
+// Start with empty items array - no dummy data
+const mockItems: any[] = [];
+
+// Keep track of logged-in user sessions
+const userSessions = new Map();
 
 export function createServer() {
   const app = express();
