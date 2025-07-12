@@ -14,6 +14,7 @@ export default {
     },
     extend: {
       colors: {
+        // ReWear Brand Colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -47,6 +48,12 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // ReWear Custom Colors
+        surface: "hsl(var(--surface))",
+        "text-secondary": "hsl(var(--text-secondary))",
+        "text-muted": "hsl(var(--text-muted))",
+        disabled: "hsl(var(--disabled))",
+        hover: "hsl(var(--hover))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
