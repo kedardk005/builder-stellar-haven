@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -80,6 +81,7 @@ interface ApiResponse {
 const Browse = () => {
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
@@ -612,7 +614,10 @@ const Browse = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index }}
                   >
-                    <Card className="border-border hover:shadow-lg transition-shadow cursor-pointer group">
+                    <Card
+                      className="border-border hover:shadow-lg transition-shadow cursor-pointer group"
+                      onClick={() => navigate(`/product/${item._id}`)}
+                    >
                       <CardContent className="p-0">
                         <div className="relative">
                           <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
@@ -727,7 +732,10 @@ const Browse = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index }}
                   >
-                    <Card className="border-border hover:shadow-lg transition-shadow cursor-pointer">
+                    <Card
+                      className="border-border hover:shadow-lg transition-shadow cursor-pointer"
+                      onClick={() => navigate(`/product/${item._id}`)}
+                    >
                       <CardContent className="p-6">
                         <div className="flex gap-4">
                           <div className="w-24 h-24 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
@@ -813,7 +821,15 @@ const Browse = () => {
                                   {item.condition}
                                 </Badge>
                               </div>
-                              <Button size="sm">View Details</Button>
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/product/${item._id}`);
+                                }}
+                              >
+                                View Details
+                              </Button>
                             </div>
                           </div>
                         </div>
