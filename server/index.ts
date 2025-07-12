@@ -346,6 +346,8 @@ export function createServer() {
     // Mock item creation - in reality this would handle FormData with images
     const itemData = req.body;
 
+    const basePrice = parseInt(itemData.price) || 20;
+
     const newItem = {
       id: Date.now().toString(),
       _id: Date.now().toString(),
@@ -356,17 +358,24 @@ export function createServer() {
       size: itemData.size || "M",
       color: itemData.color || "Black",
       condition: itemData.condition || "Good",
-      price: itemData.price || 20,
-      originalPrice: itemData.originalPrice || 50,
+      price: basePrice,
+      originalPrice: itemData.originalPrice || basePrice * 2,
+      pointsValue: Math.ceil(basePrice / 10) || 3, // Points needed to redeem
+      swapValue: basePrice, // Value for swap calculations
       images: [{ url: "/placeholder.svg", isPrimary: true }], // Mock image
-      seller: req.user || mockUsers[1],
+      seller: req.user || mockUsers[0],
       status: "pending",
       qualityBadge: "basic",
       views: 0,
       likes: 0,
+      likedBy: [],
       featured: false,
       createdAt: new Date().toISOString(),
       flaggedReasons: [],
+      swapEnabled: true, // Enable all exchange methods by default
+      pointsEnabled: true,
+      purchaseEnabled: true,
+      tags: [itemData.category || "fashion"],
     };
 
     mockItems.push(newItem);
