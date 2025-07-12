@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
+import { itemsApi } from "@/lib/api";
+import { DemoRemovalNotice } from "@/components/DemoRemovalNotice";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,6 +26,38 @@ import {
 
 const Index = () => {
   const { isAuthenticated } = useAuth();
+  const [featuredItems, setFeaturedItems] = useState([]);
+  const [stats, setStats] = useState({
+    totalItems: 0,
+    activeUsers: 0,
+    totalSales: 0,
+  });
+  const [loading, setLoading] = useState(false);
+
+  // Fetch featured items and stats
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Fetch some featured items
+        const response = await itemsApi.getItems({ limit: 6, featured: true });
+        if (response.success) {
+          setFeaturedItems(response.data);
+          setStats({
+            totalItems: response.pagination?.total || 0,
+            activeUsers: 250, // Could be fetched from admin API
+            totalSales: 1200, // Could be calculated from orders
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Auto-changing hero images
   const heroImages = [
