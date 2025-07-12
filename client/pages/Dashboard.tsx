@@ -35,22 +35,35 @@ import {
 } from "lucide-react";
 
 const Dashboard = () => {
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
+  const [myItems, setMyItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    bio: "",
+  });
 
-  // Mock user data
+  // Real user data from auth context
   const userData = {
-    name: "John Doe",
-    email: "john.doe@email.com",
-    phone: "+91 98765 43210",
-    location: "Mumbai, Maharashtra",
-    joinDate: "January 2024",
-    points: 125,
-    level: "Eco Warrior",
-    totalListings: 12,
-    totalSales: 8,
-    totalPurchases: 15,
-    rating: 4.8,
-    completedSwaps: 23,
+    name: user?.name || "User",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    location: "Not set", // Add location to user profile later
+    joinDate: user?.createdAt
+      ? new Date(user.createdAt).toLocaleDateString()
+      : "Recently",
+    points: user?.points || 0,
+    level: user?.level || "Beginner",
+    totalListings: user?.totalItemsSold || 0,
+    totalSales: user?.totalItemsSold || 0,
+    totalPurchases: user?.totalItemsBought || 0,
+    rating: user?.rating?.average || 0,
+    completedSwaps: 0, // Add to user data later
   };
 
   // Mock listings data
