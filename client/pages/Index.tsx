@@ -151,20 +151,20 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.7 }}
               >
-                <Link to="/register">
+                <Link to="/register" className="w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white border-0 text-lg px-8 py-6 w-full sm:w-auto"
+                    className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white border-0 text-lg px-8 py-6 w-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 font-semibold"
                   >
                     Start Earning Rewards
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Link to="/login">
+                <Link to="/login" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="lg"
-                    className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm text-lg px-8 py-6 w-full sm:w-auto"
+                    className="border-2 border-white/50 text-white hover:bg-white hover:text-gray-900 backdrop-blur-sm text-lg px-8 py-6 w-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-semibold hover:border-white"
                   >
                     Sign In
                   </Button>
@@ -436,21 +436,21 @@ const Index = () => {
             towards a more sustainable future.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/register">
+            <Link to="/register" className="w-full sm:w-auto">
               <Button
                 size="lg"
                 variant="secondary"
-                className="bg-white text-primary hover:bg-gray-100 text-lg px-8 py-6 w-full sm:w-auto"
+                className="bg-white text-primary hover:bg-gray-100 text-lg px-10 py-6 w-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 font-semibold"
               >
                 Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/browse">
+            <Link to="/browse" className="w-full sm:w-auto">
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm text-lg px-8 py-6 w-full sm:w-auto transition-all duration-300 hover:border-white/50"
+                className="border-2 border-white/50 text-white hover:bg-white hover:text-primary backdrop-blur-sm text-lg px-10 py-6 w-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-semibold hover:border-white"
               >
                 <ShoppingBag className="h-5 w-5 mr-2" />
                 Explore Items
