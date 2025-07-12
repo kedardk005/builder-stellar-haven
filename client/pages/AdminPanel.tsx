@@ -602,7 +602,9 @@ const AdminPanel = () => {
                             </div>
                             <div className="flex items-center gap-2">
                               <Button
-                                onClick={() => handleApproveItem(item.id)}
+                                onClick={() =>
+                                  handleApproveItem(item._id || item.id!)
+                                }
                                 size="sm"
                                 className="bg-green-600 hover:bg-green-700"
                               >
