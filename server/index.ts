@@ -269,10 +269,13 @@ export function createServer() {
     }
   });
 
-  // Items routes
+  // Items routes - Only show approved/active items for public browse
   app.get("/api/items", (req, res) => {
     const { search, category, condition, sortBy } = req.query;
-    let items = [...mockItems];
+    // Only show approved/active items for public browsing
+    let items = mockItems.filter(
+      (item) => item.status === "approved" || item.status === "active",
+    );
 
     // Filter by search
     if (search) {
