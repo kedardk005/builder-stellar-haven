@@ -479,87 +479,92 @@ const AdminPanel = () => {
           </p>
         </div>
 
-                {/* Stats Cards - Only for admins */}
+        {/* Stats Cards - Only for admins */}
         {isAdmin && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Pending Items
-              </CardTitle>
-              <Clock className="h-4 w-4 text-text-muted" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading.stats ? (
-                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
-                ) : (
-                  stats?.pendingItems || 0
-                )}
-              </div>
-              <p className="text-xs text-text-muted">Awaiting approval</p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Pending Items
+                </CardTitle>
+                <Clock className="h-4 w-4 text-text-muted" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {loading.stats ? (
+                    <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats?.pendingItems || 0
+                  )}
+                </div>
+                <p className="text-xs text-text-muted">Awaiting approval</p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Flagged Content
-              </CardTitle>
-              <Flag className="h-4 w-4 text-destructive" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-destructive">
-                {loading.stats ? (
-                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
-                ) : (
-                  stats?.flaggedItems || 0
-                )}
-              </div>
-              <p className="text-xs text-text-muted">Need attention</p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Flagged Content
+                </CardTitle>
+                <Flag className="h-4 w-4 text-destructive" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-destructive">
+                  {loading.stats ? (
+                    <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats?.flaggedItems || 0
+                  )}
+                </div>
+                <p className="text-xs text-text-muted">Need attention</p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Active Users
-              </CardTitle>
-              <Users className="h-4 w-4 text-text-muted" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading.stats ? (
-                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
-                ) : (
-                  stats?.activeUsers || 0
-                )}
-              </div>
-              <p className="text-xs text-text-muted">Online today</p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Active Users
+                </CardTitle>
+                <Users className="h-4 w-4 text-text-muted" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {loading.stats ? (
+                    <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats?.activeUsers || 0
+                  )}
+                </div>
+                <p className="text-xs text-text-muted">Online today</p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Items</CardTitle>
-              <Package className="h-4 w-4 text-text-muted" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading.stats ? (
-                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
-                ) : (
-                  stats?.totalItems || 0
-                )}
-              </div>
-              <p className="text-xs text-text-muted">Total items</p>
-            </CardContent>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Items
+                </CardTitle>
+                <Package className="h-4 w-4 text-text-muted" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {loading.stats ? (
+                    <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                  ) : (
+                    stats?.totalItems || 0
+                  )}
+                </div>
+                <p className="text-xs text-text-muted">Total items</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-                {/* Main Content Tabs */}
+        {/* Main Content Tabs */}
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList className={`grid w-full ${isAdmin ? "grid-cols-4" : "grid-cols-1"}`}>
+          <TabsList
+            className={`grid w-full ${isAdmin ? "grid-cols-4" : "grid-cols-1"}`}
+          >
             <TabsTrigger value="pending">
               {isAdmin ? "Pending Approvals" : "My Items"}
             </TabsTrigger>
