@@ -149,10 +149,108 @@ const AdminPanel = () => {
   const [pointsReason, setPointsReason] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
 
-  // Simulate admin check - in real app, this would check user role
-  const isAdmin =
-    user?.email === "admin@rewear.com" ||
-    user?.name?.toLowerCase().includes("admin");
+  // Check admin access
+  const isAdmin = user?.role === "admin" || user?.email?.includes("admin");
+
+  // Fetch admin stats
+  const fetchStats = async () => {
+    try {
+      setLoading((prev) => ({ ...prev, stats: true }));
+      const response = await adminApi.getStats();
+      if (response.success) {
+        setStats(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch admin statistics",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, stats: false }));
+    }
+  };
+
+  // Fetch pending items
+  const fetchPendingItems = async () => {
+    try {
+      setLoading((prev) => ({ ...prev, pending: true }));
+      const response = await adminApi.getPendingItems();
+      if (response.success) {
+        setPendingItems(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching pending items:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch pending items",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, pending: false }));
+    }
+  };
+
+  // Fetch flagged items
+  const fetchFlaggedItems = async () => {
+    try {
+      setLoading((prev) => ({ ...prev, flagged: true }));
+      const response = await adminApi.getFlaggedItems();
+      if (response.success) {
+        setFlaggedItems(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching flagged items:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch flagged items",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, flagged: false }));
+    }
+  };
+
+  // Fetch users
+  const fetchUsers = async () => {
+    try {
+      setLoading((prev) => ({ ...prev, users: true }));
+      const response = await adminApi.getUsers({ search: searchTerm });
+      if (response.success) {
+        setUsers(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch users",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, users: false }));
+    }
+  };
+
+  // Load initial data
+  useEffect(() => {
+    if (isAdmin) {
+      fetchStats();
+      fetchPendingItems();
+      fetchFlaggedItems();
+      fetchUsers();
+    }
+  }, [isAdmin]);
+
+  // Refetch users when search term changes
+  useEffect(() => {
+    if (isAdmin && searchTerm !== undefined) {
+      const timeoutId = setTimeout(() => {
+        fetchUsers();
+      }, 500); // Debounce search
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchTerm, isAdmin]);
 
   if (!isAdmin) {
     return (
@@ -170,41 +268,83 @@ const AdminPanel = () => {
     );
   }
 
-  const handleApproveItem = (itemId: string) => {
-    setPendingItems((items) => items.filter((item) => item.id !== itemId));
-    toast({
-      title: "Item Approved",
-      description:
-        "The item has been approved and is now live on the platform.",
-    });
+  const handleApproveItem = async (itemId: string, qualityBadge?: string) => {
+    try {
+      const response = await adminApi.approveItem(itemId, qualityBadge);
+      if (response.success) {
+        setPendingItems((items) => items.filter((item) => item.id !== itemId));
+        // Refresh stats
+        fetchStats();
+        toast({
+          title: "Item Approved",
+          description:
+            "The item has been approved and is now live on the platform.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof ApiError ? error.message : "Failed to approve item",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleRejectItem = (itemId: string, reason: string) => {
-    setPendingItems((items) => items.filter((item) => item.id !== itemId));
-    toast({
-      title: "Item Rejected",
-      description:
-        "The item has been rejected and the seller has been notified.",
-      variant: "destructive",
-    });
+  const handleRejectItem = async (itemId: string, reason: string) => {
+    try {
+      const response = await adminApi.rejectItem(itemId, reason);
+      if (response.success) {
+        setPendingItems((items) => items.filter((item) => item.id !== itemId));
+        // Refresh stats
+        fetchStats();
+        toast({
+          title: "Item Rejected",
+          description:
+            "The item has been rejected and the seller has been notified.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof ApiError ? error.message : "Failed to reject item",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleMarkQuality = (
+  const handleMarkQuality = async (
     itemId: string,
     quality: "basic" | "medium" | "high" | "premium",
   ) => {
-    setPendingItems((items) =>
-      items.map((item) =>
-        item.id === itemId ? { ...item, qualityBadge: quality } : item,
-      ),
-    );
-    toast({
-      title: "Quality Updated",
-      description: `Item quality has been marked as ${quality}.`,
-    });
+    try {
+      const response = await adminApi.updateQuality(itemId, quality);
+      if (response.success) {
+        setPendingItems((items) =>
+          items.map((item) =>
+            item.id === itemId ? { ...item, qualityBadge: quality } : item,
+          ),
+        );
+        toast({
+          title: "Quality Updated",
+          description: `Item quality has been marked as ${quality}.`,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof ApiError
+            ? error.message
+            : "Failed to update quality",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleGrantPoints = () => {
+  const handleGrantPoints = async () => {
     if (!selectedUserId || !customPoints || !pointsReason) {
       toast({
         title: "Missing Information",
@@ -214,41 +354,86 @@ const AdminPanel = () => {
       return;
     }
 
-    setUsers((users) =>
-      users.map((user) =>
-        user.id === selectedUserId
-          ? { ...user, points: user.points + parseInt(customPoints) }
-          : user,
-      ),
-    );
+    try {
+      const response = await adminApi.grantPoints(
+        selectedUserId,
+        parseInt(customPoints),
+        pointsReason,
+      );
+      if (response.success) {
+        setUsers((users) =>
+          users.map((user) =>
+            user.id === selectedUserId
+              ? { ...user, points: user.points + parseInt(customPoints) }
+              : user,
+          ),
+        );
 
-    toast({
-      title: "Points Granted",
-      description: `${customPoints} points have been granted to the selected user.`,
-    });
+        toast({
+          title: "Points Granted",
+          description: `${customPoints} points have been granted to ${response.data.user.name}.`,
+        });
 
-    setCustomPoints("");
-    setPointsReason("");
-    setSelectedUserId("");
-  };
-
-  const handleRemoveFlaggedContent = (itemId: string) => {
-    setFlaggedItems((items) => items.filter((item) => item.id !== itemId));
-    toast({
-      title: "Content Removed",
-      description:
-        "The inappropriate content has been removed from the platform.",
-    });
-  };
-
-  const handleRestoreContent = (itemId: string) => {
-    const item = flaggedItems.find((item) => item.id === itemId);
-    if (item) {
-      setFlaggedItems((items) => items.filter((item) => item.id !== itemId));
+        setCustomPoints("");
+        setPointsReason("");
+        setSelectedUserId("");
+      }
+    } catch (error) {
       toast({
-        title: "Content Restored",
+        title: "Error",
         description:
-          "The content has been reviewed and restored to the platform.",
+          error instanceof ApiError ? error.message : "Failed to grant points",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRemoveFlaggedContent = async (itemId: string) => {
+    try {
+      const response = await adminApi.moderateContent(itemId, "remove");
+      if (response.success) {
+        setFlaggedItems((items) => items.filter((item) => item.id !== itemId));
+        // Refresh stats
+        fetchStats();
+        toast({
+          title: "Content Removed",
+          description:
+            "The inappropriate content has been removed from the platform.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof ApiError
+            ? error.message
+            : "Failed to remove content",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRestoreContent = async (itemId: string) => {
+    try {
+      const response = await adminApi.moderateContent(itemId, "restore");
+      if (response.success) {
+        setFlaggedItems((items) => items.filter((item) => item.id !== itemId));
+        // Refresh stats
+        fetchStats();
+        toast({
+          title: "Content Restored",
+          description:
+            "The content has been reviewed and restored to the platform.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof ApiError
+            ? error.message
+            : "Failed to restore content",
+        variant: "destructive",
       });
     }
   };
