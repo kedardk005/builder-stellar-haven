@@ -6,11 +6,13 @@ interface User {
   email: string;
   points: number;
   avatar?: string;
+  role?: "user" | "admin";
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (userData: any) => Promise<void>;
   logout: () => void;
@@ -58,10 +60,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Mock successful login
       const mockUser: User = {
         id: "1",
-        name: "John Doe",
+        name: email.includes("admin") ? "Admin User" : "John Doe",
         email: email,
         points: 125,
         avatar: "/placeholder-avatar.jpg",
+        role: email.includes("admin") ? "admin" : "user",
       };
 
       setUser(mockUser);
@@ -83,6 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         email: userData.email,
         points: 50, // Welcome bonus
         avatar: "/placeholder-avatar.jpg",
+        role: "user",
       };
 
       setUser(mockUser);
@@ -102,6 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
+    isAdmin: user?.role === "admin" || user?.email?.includes("admin") || false,
     login,
     register,
     logout,
