@@ -101,12 +101,16 @@ const Dashboard = () => {
   // Handle profile edit
   const handleProfileEdit = async () => {
     try {
-      // In a real app, this would call an API to update profile
-      toast({
-        title: "Profile Updated",
-        description: "Your profile has been updated successfully!",
-      });
-      setIsEditProfileOpen(false);
+      const response = await authApi.updateProfile(profileData);
+      if (response.success) {
+        toast({
+          title: "Profile Updated",
+          description: "Your profile has been updated successfully!",
+        });
+        setIsEditProfileOpen(false);
+        // Optionally refresh user data
+        window.location.reload(); // Simple way to refresh user data
+      }
     } catch (error) {
       toast({
         title: "Error",
