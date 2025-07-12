@@ -432,9 +432,9 @@ const Browse = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index }}
                   >
-                    <Link to={`/product/${item.id}`}>
+                                        <Link to={`/product/${item.id}`}>
                       <Card className="border-border hover:shadow-lg transition-shadow cursor-pointer group">
-                      <CardContent className="p-0">
+                        <CardContent className="p-0">
                         <div className="relative">
                           <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
                             <img
