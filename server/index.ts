@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-const demoRoutes = require("./routes/demo");
 
 // Mock data - Start with clean state
 const mockUsers = [
