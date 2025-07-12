@@ -203,6 +203,17 @@ export const itemsApi = {
     });
     return api.get(`/api/items/user/my-items?${query}`);
   },
+
+  // Exchange methods
+  requestSwap: (
+    itemId: string,
+    data: { message?: string; offeredItemId?: string },
+  ) => api.post(`/api/items/${itemId}/swap`, data),
+
+  redeemWithPoints: (itemId: string) => api.post(`/api/items/${itemId}/redeem`),
+
+  purchaseWithINR: (itemId: string, data: { paymentMethod?: string }) =>
+    api.post(`/api/items/${itemId}/purchase`, data),
 };
 
 // Orders API functions
