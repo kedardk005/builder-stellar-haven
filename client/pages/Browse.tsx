@@ -426,13 +426,14 @@ const Browse = () => {
                 transition={{ duration: 0.6, delay: 0.6 }}
               >
                 {items.map((item, index) => (
-                  <motion.div
+                                    <motion.div
                     key={item.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index }}
                   >
-                    <Card className="border-border hover:shadow-lg transition-shadow cursor-pointer group">
+                    <Link to={`/product/${item.id}`}>
+                      <Card className="border-border hover:shadow-lg transition-shadow cursor-pointer group">
                       <CardContent className="p-0">
                         <div className="relative">
                           <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
