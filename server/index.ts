@@ -612,8 +612,8 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
-  // Demo data management routes
-  app.use("/api/demo", demoRoutes);
+  // Demo data management routes (only available when MongoDB models are working)
+  // app.use("/api/demo", demoRoutes);
 
   return app;
 }
