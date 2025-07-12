@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,6 +35,35 @@ const Browse = () => {
   const { isAuthenticated } = useAuth();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
+
+  // Auto-changing banner images
+  const bannerImages = [
+    {
+      url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=400&fit=crop",
+      alt: "Sustainable Fashion Marketplace",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1200&h=400&fit=crop",
+      alt: "Vintage Clothing Collection",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1200&h=400&fit=crop",
+      alt: "Fashion Exchange Community",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=1200&h=400&fit=crop",
+      alt: "Pre-loved Designer Items",
+    },
+  ];
+
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBannerIndex((prev) => (prev + 1) % bannerImages.length);
+    }, 5000); // Change every 5 seconds
+    return () => clearInterval(interval);
+  }, [bannerImages.length]);
 
   // Mock data for demonstration
   const items = [
@@ -150,7 +180,7 @@ const Browse = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Banner with Rectangular Image */}
+      {/* Hero Banner with Auto-changing Images */}
       <motion.section
         className="relative h-80 overflow-hidden"
         initial={{ opacity: 0 }}
@@ -158,12 +188,23 @@ const Browse = () => {
         transition={{ duration: 0.6 }}
       >
         <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=400&fit=crop"
-            alt="Sustainable Fashion Marketplace"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60"></div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentBannerIndex}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2 }}
+              className="absolute inset-0"
+            >
+              <img
+                src={bannerImages[currentBannerIndex].url}
+                alt={bannerImages[currentBannerIndex].alt}
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </AnimatePresence>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/70"></div>
         </div>
 
         <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
@@ -177,10 +218,10 @@ const Browse = () => {
                 <Sparkles className="h-3 w-3 mr-1" />
                 Sustainable Fashion Marketplace
               </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
                 Discover Pre-Loved Fashion Treasures
               </h1>
-              <p className="text-lg text-gray-200 mb-6">
+              <p className="text-lg text-gray-100 mb-6 drop-shadow-md">
                 Browse thousands of verified items from our community. Find
                 unique pieces, earn rewards, and make sustainable choices.
               </p>
