@@ -41,8 +41,12 @@ export function createServer() {
   const mockAuth = (req: any, res: any, next: any) => {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith("Bearer ")) {
-      // For demo, always return admin user
-      req.user = mockUsers.find((u) => u.role === "admin");
+      const token = authHeader.substring(7);
+      // Get user from session
+      const user = userSessions.get(token);
+      if (user) {
+        req.user = user;
+      }
     }
     next();
   };
