@@ -25,8 +25,12 @@ export const Navigation = () => {
 
   const navItems = [
     { label: "Browse", href: "/browse", icon: ShoppingBag },
-    { label: "Sell", href: "/sell", icon: Recycle },
-    { label: "Wishlist", href: "/wishlist", icon: Heart },
+    ...(isAuthenticated
+      ? [
+          { label: "Sell", href: "/sell", icon: Recycle },
+          { label: "Wishlist", href: "/wishlist", icon: Heart },
+        ]
+      : []),
   ];
 
   const isActive = (path: string) => location.pathname === path;
