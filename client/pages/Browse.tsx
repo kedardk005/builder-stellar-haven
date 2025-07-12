@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AuthGuard, ProtectedButton } from "@/components/AuthGuard";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Filter,
   Search,
@@ -21,10 +24,14 @@ import {
   Grid3X3,
   List,
   SlidersHorizontal,
+  ShoppingBag,
+  Users,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Browse = () => {
+  const { isAuthenticated } = useAuth();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -38,7 +45,8 @@ const Browse = () => {
       condition: "Excellent",
       price: 450,
       points: 25,
-      image: "/placeholder.svg",
+      image:
+        "https://images.unsplash.com/photo-1544966503-7ba9043d5ada?w=400&h=400&fit=crop",
       tags: ["Vintage", "Denim", "Casual"],
       rating: 4.8,
       seller: "FashionLover23",
@@ -53,7 +61,8 @@ const Browse = () => {
       condition: "Good",
       price: 280,
       points: 18,
-      image: "/placeholder.svg",
+      image:
+        "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&h=400&fit=crop",
       tags: ["Summer", "Floral", "Dress"],
       rating: 4.5,
       seller: "StyleGuru",
@@ -68,7 +77,8 @@ const Browse = () => {
       condition: "Like New",
       price: 1200,
       points: 65,
-      image: "/placeholder.svg",
+      image:
+        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",
       tags: ["Designer", "Leather", "Accessories"],
       rating: 5.0,
       seller: "LuxuryCloset",
@@ -83,7 +93,8 @@ const Browse = () => {
       condition: "Good",
       price: 320,
       points: 20,
-      image: "/placeholder.svg",
+      image:
+        "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop",
       tags: ["Sneakers", "Casual", "Sports"],
       rating: 4.2,
       seller: "SneakerHead",
@@ -98,7 +109,8 @@ const Browse = () => {
       condition: "Excellent",
       price: 380,
       points: 22,
-      image: "/placeholder.svg",
+      image:
+        "https://images.unsplash.com/photo-1544441893-675973e31985?w=400&h=400&fit=crop",
       tags: ["Winter", "Wool", "Coat"],
       rating: 4.6,
       seller: "WinterWardrobe",
@@ -113,7 +125,8 @@ const Browse = () => {
       condition: "Like New",
       price: 650,
       points: 35,
-      image: "/placeholder.svg",
+      image:
+        "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400&h=400&fit=crop",
       tags: ["Formal", "Silk", "Business"],
       rating: 4.9,
       seller: "ProfessionalStyle",
@@ -137,19 +150,71 @@ const Browse = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Browse Items
-          </h1>
-          <p className="text-text-secondary">
-            Discover amazing pre-loved fashion from our community
-          </p>
+      {/* Hero Banner with Rectangular Image */}
+      <motion.section
+        className="relative h-80 overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=400&fit=crop"
+            alt="Sustainable Fashion Marketplace"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60"></div>
         </div>
 
-        {/* Search and Controls */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-8">
+        <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
+          <div className="max-w-2xl">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <Badge className="bg-primary/20 text-primary border-primary/30 backdrop-blur-sm mb-4">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Sustainable Fashion Marketplace
+              </Badge>
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                Discover Pre-Loved Fashion Treasures
+              </h1>
+              <p className="text-lg text-gray-200 mb-6">
+                Browse thousands of verified items from our community. Find
+                unique pieces, earn rewards, and make sustainable choices.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+                  <Input
+                    type="text"
+                    placeholder="Search for items, brands, or styles..."
+                    className="pl-10 bg-white/90 backdrop-blur-sm border-white/20"
+                  />
+                </div>
+                <ProtectedButton
+                  feature="selling items"
+                  variant="secondary"
+                  className="bg-white text-primary hover:bg-gray-100"
+                >
+                  <ShoppingBag className="h-4 w-4 mr-2" />
+                  Start Selling
+                </ProtectedButton>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </motion.section>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Browse Controls */}
+        <motion.div
+          className="flex flex-col lg:flex-row gap-4 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
@@ -200,15 +265,57 @@ const Browse = () => {
               </Button>
             </div>
           </div>
-        </div>
+        </motion.div>
+
+        {/* Stats Bar */}
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <Card className="border-border bg-surface">
+            <CardContent className="p-4 text-center">
+              <ShoppingBag className="h-6 w-6 text-primary mx-auto mb-2" />
+              <div className="text-2xl font-bold text-foreground">
+                {items.length}
+              </div>
+              <div className="text-xs text-text-muted">Items Available</div>
+            </CardContent>
+          </Card>
+          <Card className="border-border bg-surface">
+            <CardContent className="p-4 text-center">
+              <Users className="h-6 w-6 text-primary mx-auto mb-2" />
+              <div className="text-2xl font-bold text-foreground">250+</div>
+              <div className="text-xs text-text-muted">Active Sellers</div>
+            </CardContent>
+          </Card>
+          <Card className="border-border bg-surface">
+            <CardContent className="p-4 text-center">
+              <Star className="h-6 w-6 text-primary mx-auto mb-2" />
+              <div className="text-2xl font-bold text-foreground">4.8</div>
+              <div className="text-xs text-text-muted">Avg Rating</div>
+            </CardContent>
+          </Card>
+          <Card className="border-border bg-surface">
+            <CardContent className="p-4 text-center">
+              <Recycle className="h-6 w-6 text-primary mx-auto mb-2" />
+              <div className="text-2xl font-bold text-foreground">50K+</div>
+              <div className="text-xs text-text-muted">Items Recycled</div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         <div className="flex gap-8">
           {/* Filters Sidebar */}
-          <div
+          <motion.div
             className={cn(
               "w-64 space-y-6",
               showFilters ? "block" : "hidden lg:block",
             )}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
           >
             <Card className="border-border">
               <CardContent className="p-6">
@@ -300,7 +407,7 @@ const Browse = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
 
           {/* Items Grid/List */}
           <div className="flex-1">
@@ -311,131 +418,35 @@ const Browse = () => {
             </div>
 
             {viewMode === "grid" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {items.map((item) => (
-                  <Card
+              <motion.div
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
+                {items.map((item, index) => (
+                  <motion.div
                     key={item.id}
-                    className="border-border hover:shadow-lg transition-shadow cursor-pointer group"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 * index }}
                   >
-                    <CardContent className="p-0">
-                      <div className="relative">
-                        <div className="aspect-square bg-muted rounded-t-lg flex items-center justify-center">
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            className="w-full h-full object-cover rounded-t-lg"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                              e.currentTarget.parentElement!.innerHTML =
-                                '<div class="w-full h-full flex items-center justify-center text-text-muted"><span class="text-sm">No Image</span></div>';
-                            }}
-                          />
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute top-2 right-2 bg-background/80 hover:bg-background"
-                        >
-                          <Heart
-                            className={cn(
-                              "h-4 w-4",
-                              item.isLiked
-                                ? "fill-red-500 text-red-500"
-                                : "text-text-muted",
-                            )}
-                          />
-                        </Button>
-                        {item.quality === "premium" && (
-                          <Badge className="absolute top-2 left-2 bg-primary">
-                            Premium
-                          </Badge>
-                        )}
-                        {item.quality === "high" && (
-                          <Badge className="absolute top-2 left-2 bg-yellow-500">
-                            High Quality
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="p-4 space-y-3">
-                        <div>
-                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                            {item.title}
-                          </h3>
-                          <p className="text-sm text-text-secondary">
-                            {item.brand} • Size {item.size}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span className="text-xs text-text-secondary">
-                            {item.rating} • by {item.seller}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {item.tags.slice(0, 2).map((tag) => (
-                            <Badge
-                              key={tag}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-semibold text-foreground">
-                              ₹{item.price}
-                            </div>
-                            <div className="text-xs text-text-muted flex items-center">
-                              <Recycle className="h-3 w-3 mr-1" />
-                              {item.points} pts
-                            </div>
+                    <Card className="border-border hover:shadow-lg transition-shadow cursor-pointer group">
+                      <CardContent className="p-0">
+                        <div className="relative">
+                          <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
                           </div>
-                          <Badge
-                            variant="outline"
-                            className="text-xs text-primary border-primary"
-                          >
-                            {item.condition}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {items.map((item) => (
-                  <Card
-                    key={item.id}
-                    className="border-border hover:shadow-lg transition-shadow cursor-pointer"
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex gap-4">
-                        <div className="w-24 h-24 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                              e.currentTarget.parentElement!.innerHTML =
-                                '<div class="w-full h-full flex items-center justify-center text-text-muted text-xs">No Image</div>';
-                            }}
-                          />
-                        </div>
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-semibold text-foreground">
-                                {item.title}
-                              </h3>
-                              <p className="text-sm text-text-secondary">
-                                {item.brand} • Size {item.size}
-                              </p>
-                            </div>
-                            <Button variant="ghost" size="sm">
+                          <AuthGuard feature="wishlist">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="absolute top-2 right-2 bg-background/80 hover:bg-background"
+                            >
                               <Heart
                                 className={cn(
                                   "h-4 w-4",
@@ -445,6 +456,26 @@ const Browse = () => {
                                 )}
                               />
                             </Button>
+                          </AuthGuard>
+                          {item.quality === "premium" && (
+                            <Badge className="absolute top-2 left-2 bg-primary">
+                              Premium
+                            </Badge>
+                          )}
+                          {item.quality === "high" && (
+                            <Badge className="absolute top-2 left-2 bg-yellow-500">
+                              High Quality
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="p-4 space-y-3">
+                          <div>
+                            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                              {item.title}
+                            </h3>
+                            <p className="text-sm text-text-secondary">
+                              {item.brand} • Size {item.size}
+                            </p>
                           </div>
                           <div className="flex items-center space-x-1">
                             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -453,7 +484,7 @@ const Browse = () => {
                             </span>
                           </div>
                           <div className="flex flex-wrap gap-1">
-                            {item.tags.map((tag) => (
+                            {item.tags.slice(0, 2).map((tag) => (
                               <Badge
                                 key={tag}
                                 variant="secondary"
@@ -464,31 +495,119 @@ const Browse = () => {
                             ))}
                           </div>
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                              <div>
-                                <div className="font-semibold text-foreground">
-                                  ₹{item.price}
-                                </div>
-                                <div className="text-xs text-text-muted flex items-center">
-                                  <Recycle className="h-3 w-3 mr-1" />
-                                  {item.points} pts
-                                </div>
+                            <div>
+                              <div className="font-semibold text-foreground">
+                                ₹{item.price}
                               </div>
-                              <Badge
-                                variant="outline"
-                                className="text-xs text-primary border-primary"
-                              >
-                                {item.condition}
-                              </Badge>
+                              <div className="text-xs text-text-muted flex items-center">
+                                <Recycle className="h-3 w-3 mr-1" />
+                                {item.points} pts
+                              </div>
                             </div>
-                            <Button size="sm">View Details</Button>
+                            <Badge
+                              variant="outline"
+                              className="text-xs text-primary border-primary"
+                            >
+                              {item.condition}
+                            </Badge>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                className="space-y-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
+                {items.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 * index }}
+                  >
+                    <Card className="border-border hover:shadow-lg transition-shadow cursor-pointer">
+                      <CardContent className="p-6">
+                        <div className="flex gap-4">
+                          <div className="w-24 h-24 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h3 className="font-semibold text-foreground">
+                                  {item.title}
+                                </h3>
+                                <p className="text-sm text-text-secondary">
+                                  {item.brand} • Size {item.size}
+                                </p>
+                              </div>
+                              <AuthGuard feature="wishlist">
+                                <Button variant="ghost" size="sm">
+                                  <Heart
+                                    className={cn(
+                                      "h-4 w-4",
+                                      item.isLiked
+                                        ? "fill-red-500 text-red-500"
+                                        : "text-text-muted",
+                                    )}
+                                  />
+                                </Button>
+                              </AuthGuard>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              <span className="text-xs text-text-secondary">
+                                {item.rating} • by {item.seller}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {item.tags.map((tag) => (
+                                <Badge
+                                  key={tag}
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div>
+                                  <div className="font-semibold text-foreground">
+                                    ₹{item.price}
+                                  </div>
+                                  <div className="text-xs text-text-muted flex items-center">
+                                    <Recycle className="h-3 w-3 mr-1" />
+                                    {item.points} pts
+                                  </div>
+                                </div>
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs text-primary border-primary"
+                                >
+                                  {item.condition}
+                                </Badge>
+                              </div>
+                              <Button size="sm">View Details</Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </motion.div>
             )}
 
             {/* Load More */}
