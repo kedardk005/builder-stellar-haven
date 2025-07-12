@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+const demoRoutes = require("./routes/demo");
 
 // Mock data - Start with clean state
 const mockUsers = [
@@ -610,6 +611,9 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+
+  // Demo data management routes
+  app.use("/api/demo", demoRoutes);
 
   return app;
 }
