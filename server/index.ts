@@ -155,19 +155,33 @@ export function createServer() {
 
   // Admin routes
   app.get("/api/admin/stats", mockAuth, (req, res) => {
+    const pendingItems = mockItems.filter(
+      (item) => item.status === "pending",
+    ).length;
+    const flaggedItems = mockItems.filter(
+      (item) => item.status === "flagged",
+    ).length;
+    const approvedItems = mockItems.filter(
+      (item) => item.status === "approved" || item.status === "active",
+    ).length;
+    const rejectedItems = mockItems.filter(
+      (item) => item.status === "rejected",
+    ).length;
+    const soldItems = mockItems.filter((item) => item.status === "sold").length;
+
     res.json({
       success: true,
       data: {
-        pendingItems: 1,
-        flaggedItems: 0,
-        activeUsers: 2,
-        totalItems: 1,
-        totalUsers: 2,
-        soldItems: 0,
+        pendingItems,
+        flaggedItems,
+        activeUsers: mockUsers.filter((u) => u.isActive).length,
+        totalItems: mockItems.length,
+        totalUsers: mockUsers.length,
+        soldItems,
         revenue: 0,
-        activeItems: 0,
-        approvedItems: 0,
-        rejectedItems: 0,
+        activeItems: approvedItems,
+        approvedItems,
+        rejectedItems,
       },
     });
   });
