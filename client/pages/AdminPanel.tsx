@@ -479,8 +479,9 @@ const AdminPanel = () => {
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                {/* Stats Cards - Only for admins */}
+        {isAdmin && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -556,11 +557,9 @@ const AdminPanel = () => {
           </Card>
         </div>
 
-        {/* Main Content Tabs */}
+                {/* Main Content Tabs */}
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList
-            className={`grid w-full ${isAdmin ? "grid-cols-4" : "grid-cols-1"}`}
-          >
+          <TabsList className={`grid w-full ${isAdmin ? "grid-cols-4" : "grid-cols-1"}`}>
             <TabsTrigger value="pending">
               {isAdmin ? "Pending Approvals" : "My Items"}
             </TabsTrigger>
