@@ -66,49 +66,49 @@ const Dashboard = () => {
     completedSwaps: 0, // Add to user data later
   };
 
-  // Mock listings data
-  const myListings = [
-    {
-      id: 1,
-      title: "Vintage Denim Jacket",
-      price: 450,
-      points: 25,
-      status: "Active",
-      image: "/placeholder.svg",
-      views: 34,
-      likes: 12,
-    },
-    {
-      id: 2,
-      title: "Summer Floral Dress",
-      price: 280,
-      points: 18,
-      status: "Sold",
-      image: "/placeholder.svg",
-      views: 56,
-      likes: 8,
-    },
-    {
-      id: 3,
-      title: "Designer Leather Bag",
-      price: 1200,
-      points: 65,
-      status: "Pending",
-      image: "/placeholder.svg",
-      views: 23,
-      likes: 15,
-    },
-    {
-      id: 4,
-      title: "Casual Sneakers",
-      price: 320,
-      points: 20,
-      status: "Active",
-      image: "/placeholder.svg",
-      views: 19,
-      likes: 6,
-    },
-  ];
+  // Fetch user's items
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchMyItems();
+    }
+  }, [isAuthenticated]);
+
+  const fetchMyItems = async () => {
+    try {
+      setLoading(true);
+      const response = await itemsApi.getMyItems();
+      if (response.success) {
+        setMyItems(response.data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch your items",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle profile edit
+  const handleProfileEdit = async () => {
+    try {
+      // In a real app, this would call an API to update profile
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully!",
+      });
+      setIsEditProfileOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Mock purchases data
   const myPurchases = [
