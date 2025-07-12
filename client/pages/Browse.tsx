@@ -398,7 +398,11 @@ const Browse = () => {
             <CardContent className="p-4 text-center">
               <ShoppingBag className="h-6 w-6 text-primary mx-auto mb-2" />
               <div className="text-2xl font-bold text-foreground">
-                {items.length}
+                {loading ? (
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                ) : (
+                  totalItems
+                )}
               </div>
               <div className="text-xs text-text-muted">Items Available</div>
             </CardContent>
@@ -574,7 +578,27 @@ const Browse = () => {
               )}
             </div>
 
-            {viewMode === "grid" ? (
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <span className="ml-2">Loading items...</span>
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+                <h3 className="text-lg font-semibold">Failed to load items</h3>
+                <p className="text-text-muted mb-4">{error}</p>
+                <Button onClick={fetchItems}>Try Again</Button>
+              </div>
+            ) : items.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <ShoppingBag className="h-12 w-12 text-text-muted mb-4" />
+                <h3 className="text-lg font-semibold">No items found</h3>
+                <p className="text-text-muted">
+                  Try adjusting your search or filters
+                </p>
+              </div>
+            ) : viewMode === "grid" ? (
               <motion.div
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 initial={{ opacity: 0 }}
@@ -583,7 +607,7 @@ const Browse = () => {
               >
                 {items.map((item, index) => (
                   <motion.div
-                    key={item.id}
+                    key={item._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index }}
@@ -593,9 +617,13 @@ const Browse = () => {
                         <div className="relative">
                           <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
                             <img
-                              src={item.image}
+                              src={item.images?.[0]?.url || "/placeholder.svg"}
                               alt={item.title}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  "/placeholder.svg";
+                              }}
                             />
                           </div>
                           <AuthGuard feature="wishlist">
@@ -603,6 +631,10 @@ const Browse = () => {
                               variant="ghost"
                               size="sm"
                               className="absolute top-2 right-2 bg-background/80 hover:bg-background"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLikeItem(item._id);
+                              }}
                             >
                               <Heart
                                 className={cn(
@@ -614,12 +646,12 @@ const Browse = () => {
                               />
                             </Button>
                           </AuthGuard>
-                          {item.quality === "premium" && (
+                          {item.qualityBadge === "premium" && (
                             <Badge className="absolute top-2 left-2 bg-primary">
                               Premium
                             </Badge>
                           )}
-                          {item.quality === "high" && (
+                          {item.qualityBadge === "high" && (
                             <Badge className="absolute top-2 left-2 bg-yellow-500">
                               High Quality
                             </Badge>
@@ -637,11 +669,12 @@ const Browse = () => {
                           <div className="flex items-center space-x-1">
                             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                             <span className="text-xs text-text-secondary">
-                              {item.rating} • by {item.seller}
+                              {item.seller?.rating?.average || 0} • by{" "}
+                              {item.seller?.name || "Unknown"}
                             </span>
                           </div>
                           <div className="flex flex-wrap gap-1">
-                            {item.tags.slice(0, 2).map((tag) => (
+                            {item.tags?.slice(0, 2).map((tag) => (
                               <Badge
                                 key={tag}
                                 variant="secondary"
@@ -649,7 +682,11 @@ const Browse = () => {
                               >
                                 {tag}
                               </Badge>
-                            ))}
+                            )) || (
+                              <Badge variant="secondary" className="text-xs">
+                                {item.category}
+                              </Badge>
+                            )}
                           </div>
                           <div className="flex items-center justify-between">
                             <div>
@@ -658,7 +695,9 @@ const Browse = () => {
                               </div>
                               <div className="text-xs text-text-muted flex items-center">
                                 <Recycle className="h-3 w-3 mr-1" />
-                                {item.points} pts
+                                {item.points ||
+                                  Math.floor(item.price * 0.1)}{" "}
+                                pts
                               </div>
                             </div>
                             <Badge
