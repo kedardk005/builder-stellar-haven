@@ -98,6 +98,15 @@ export function createServer() {
   app.post("/api/auth/register", (req, res) => {
     const { name, email, phone, password } = req.body;
 
+    // Check if user already exists
+    const existingUser = mockUsers.find((u) => u.email === email);
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists with this email",
+      });
+    }
+
     const newUser = {
       id: Date.now().toString(),
       name,
@@ -118,10 +127,14 @@ export function createServer() {
 
     mockUsers.push(newUser);
 
+    // Generate unique token and store session
+    const token = `token-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    userSessions.set(token, newUser);
+
     res.status(201).json({
       success: true,
       message: "User registered successfully",
-      token: "mock-jwt-token",
+      token,
       user: newUser,
     });
   });
