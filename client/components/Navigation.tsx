@@ -46,6 +46,24 @@ export const Navigation = () => {
           <div className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => {
               const Icon = item.icon;
+
+              // Check if this is the sell item and user is not authenticated
+              if (item.href === "/sell" && !isAuthenticated) {
+                return (
+                  <ProtectedButton
+                    key={item.href}
+                    feature="selling items"
+                    variant="ghost"
+                    className={cn(
+                      "flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-text-secondary hover:bg-surface hover:text-foreground",
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{item.label}</span>
+                  </ProtectedButton>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
@@ -235,6 +253,23 @@ export const Navigation = () => {
               {/* Navigation Items */}
               {navItems.map((item) => {
                 const Icon = item.icon;
+
+                // Check if this is the sell item and user is not authenticated
+                if (item.href === "/sell" && !isAuthenticated) {
+                  return (
+                    <ProtectedButton
+                      key={item.href}
+                      feature="selling items"
+                      variant="ghost"
+                      className="flex items-center space-x-3 px-2 py-3 rounded-lg text-sm font-medium transition-colors text-text-secondary hover:bg-surface hover:text-foreground w-full justify-start"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                    </ProtectedButton>
+                  );
+                }
+
                 return (
                   <Link
                     key={item.href}
