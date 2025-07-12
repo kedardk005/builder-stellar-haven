@@ -722,7 +722,7 @@ const Browse = () => {
               >
                 {items.map((item, index) => (
                   <motion.div
-                    key={item.id}
+                    key={item._id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 * index }}
@@ -732,9 +732,13 @@ const Browse = () => {
                         <div className="flex gap-4">
                           <div className="w-24 h-24 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
                             <img
-                              src={item.image}
+                              src={item.images?.[0]?.url || "/placeholder.svg"}
                               alt={item.title}
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  "/placeholder.svg";
+                              }}
                             />
                           </div>
                           <div className="flex-1 space-y-2">
@@ -748,7 +752,14 @@ const Browse = () => {
                                 </p>
                               </div>
                               <AuthGuard feature="wishlist">
-                                <Button variant="ghost" size="sm">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleLikeItem(item._id);
+                                  }}
+                                >
                                   <Heart
                                     className={cn(
                                       "h-4 w-4",
@@ -763,11 +774,12 @@ const Browse = () => {
                             <div className="flex items-center space-x-1">
                               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                               <span className="text-xs text-text-secondary">
-                                {item.rating} • by {item.seller}
+                                {item.seller?.rating?.average || 0} • by{" "}
+                                {item.seller?.name || "Unknown"}
                               </span>
                             </div>
                             <div className="flex flex-wrap gap-1">
-                              {item.tags.map((tag) => (
+                              {item.tags?.map((tag) => (
                                 <Badge
                                   key={tag}
                                   variant="secondary"
@@ -775,7 +787,11 @@ const Browse = () => {
                                 >
                                   {tag}
                                 </Badge>
-                              ))}
+                              )) || (
+                                <Badge variant="secondary" className="text-xs">
+                                  {item.category}
+                                </Badge>
+                              )}
                             </div>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-4">
@@ -785,7 +801,9 @@ const Browse = () => {
                                   </div>
                                   <div className="text-xs text-text-muted flex items-center">
                                     <Recycle className="h-3 w-3 mr-1" />
-                                    {item.points} pts
+                                    {item.points ||
+                                      Math.floor(item.price * 0.1)}{" "}
+                                    pts
                                   </div>
                                 </div>
                                 <Badge
@@ -807,11 +825,23 @@ const Browse = () => {
             )}
 
             {/* Load More */}
-            <div className="mt-8 text-center">
-              <Button variant="outline" size="lg">
-                Load More Items
-              </Button>
-            </div>
+            {!loading && !error && items.length > 0 && (
+              <div className="mt-8 text-center">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  disabled={currentPage * 12 >= totalItems}
+                >
+                  {currentPage * 12 >= totalItems
+                    ? "No More Items"
+                    : "Load More Items"}
+                </Button>
+                <p className="text-xs text-text-muted mt-2">
+                  Showing {items.length} of {totalItems} items
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
