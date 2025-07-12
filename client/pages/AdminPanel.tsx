@@ -399,7 +399,9 @@ const AdminPanel = () => {
     try {
       const response = await adminApi.moderateContent(itemId, "remove");
       if (response.success) {
-        setFlaggedItems((items) => items.filter((item) => item.id !== itemId));
+        setFlaggedItems((items) =>
+          items.filter((item) => (item._id || item.id) !== itemId),
+        );
         // Refresh stats
         fetchStats();
         toast({
@@ -424,7 +426,9 @@ const AdminPanel = () => {
     try {
       const response = await adminApi.moderateContent(itemId, "restore");
       if (response.success) {
-        setFlaggedItems((items) => items.filter((item) => item.id !== itemId));
+        setFlaggedItems((items) =>
+          items.filter((item) => (item._id || item.id) !== itemId),
+        );
         // Refresh stats
         fetchStats();
         toast({
