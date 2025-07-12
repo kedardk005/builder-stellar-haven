@@ -153,6 +153,35 @@ export function createServer() {
     }
   });
 
+  app.put("/api/auth/profile", mockAuth, (req: any, res) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const { name, email, phone, bio } = req.body;
+
+    // Update user data
+    if (name) req.user.name = name;
+    if (email) req.user.email = email;
+    if (phone) req.user.phone = phone;
+    if (bio) req.user.bio = bio;
+
+    // Update in users array
+    const userIndex = mockUsers.findIndex((u) => u.id === req.user.id);
+    if (userIndex !== -1) {
+      mockUsers[userIndex] = { ...req.user };
+    }
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: req.user,
+    });
+  });
+
   // Admin routes
   app.get("/api/admin/stats", mockAuth, (req, res) => {
     const pendingItems = mockItems.filter(
@@ -485,12 +514,10 @@ export function createServer() {
     }
 
     if (!item.pointsEnabled) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Points redemption not available for this item",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Points redemption not available for this item",
+      });
     }
 
     const pointsCost = item.pointsValue || 3;
@@ -547,12 +574,10 @@ export function createServer() {
     }
 
     if (!item.purchaseEnabled) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Purchase not available for this item",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Purchase not available for this item",
+      });
     }
 
     // Mock payment processing (in reality, integrate with Razorpay)
