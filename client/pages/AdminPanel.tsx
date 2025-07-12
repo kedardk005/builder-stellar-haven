@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { adminApi, ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -115,130 +116,33 @@ interface User {
   lastActive: string;
 }
 
-// Mock data - In real app, this would come from API
-const mockPendingItems: Item[] = [
-  {
-    id: "1",
-    title: "Vintage Denim Jacket",
-    description:
-      "Classic blue denim jacket in excellent condition. Barely worn, from a smoke-free home.",
-    category: "Outerwear",
-    brand: "Levi's",
-    size: "M",
-    color: "Blue",
-    condition: "Excellent",
-    price: 85,
-    originalPrice: 120,
-    images: [{ url: "/placeholder.svg", isPrimary: true }],
-    seller: {
-      id: "u1",
-      name: "Sarah Johnson",
-      email: "sarah@example.com",
-      avatar: "/placeholder.svg",
-      rating: { average: 4.8, count: 24 },
-    },
-    status: "pending",
-    qualityBadge: "high",
-    views: 0,
-    likes: 0,
-    featured: false,
-    createdAt: "2024-01-15T10:30:00Z",
-  },
-  {
-    id: "2",
-    title: "Designer Evening Dress",
-    description:
-      "Stunning black cocktail dress, perfect for special occasions. Only worn once to a wedding.",
-    category: "Dresses",
-    brand: "Zara",
-    size: "S",
-    color: "Black",
-    condition: "Like New",
-    price: 150,
-    originalPrice: 250,
-    images: [{ url: "/placeholder.svg", isPrimary: true }],
-    seller: {
-      id: "u2",
-      name: "Emma Wilson",
-      email: "emma@example.com",
-      rating: { average: 4.9, count: 18 },
-    },
-    status: "pending",
-    qualityBadge: "premium",
-    views: 0,
-    likes: 0,
-    featured: false,
-    createdAt: "2024-01-15T14:20:00Z",
-  },
-];
-
-const mockFlaggedItems: Item[] = [
-  {
-    id: "3",
-    title: "Inappropriate Content Item",
-    description:
-      "This item has been flagged for review due to inappropriate content or policy violation.",
-    category: "Tops",
-    brand: "Unknown",
-    size: "M",
-    color: "Red",
-    condition: "Good",
-    price: 45,
-    images: [{ url: "/placeholder.svg", isPrimary: true }],
-    seller: {
-      id: "u3",
-      name: "Flagged User",
-      email: "flagged@example.com",
-      rating: { average: 3.2, count: 5 },
-    },
-    status: "flagged",
-    qualityBadge: "basic",
-    views: 12,
-    likes: 2,
-    featured: false,
-    createdAt: "2024-01-14T16:45:00Z",
-    flaggedReasons: ["Inappropriate images", "Misleading description"],
-  },
-];
-
-const mockUsers: User[] = [
-  {
-    id: "u1",
-    name: "Sarah Johnson",
-    email: "sarah@example.com",
-    points: 1250,
-    level: "Enthusiast",
-    avatar: "/placeholder.svg",
-    isActive: true,
-    isVerified: true,
-    totalItemsSold: 15,
-    totalItemsBought: 8,
-    rating: { average: 4.8, count: 24 },
-    createdAt: "2023-06-15T10:30:00Z",
-    lastActive: "2024-01-15T10:30:00Z",
-  },
-  {
-    id: "u2",
-    name: "Emma Wilson",
-    email: "emma@example.com",
-    points: 850,
-    level: "Explorer",
-    isActive: true,
-    isVerified: false,
-    totalItemsSold: 8,
-    totalItemsBought: 12,
-    rating: { average: 4.9, count: 18 },
-    createdAt: "2023-08-20T14:20:00Z",
-    lastActive: "2024-01-15T14:20:00Z",
-  },
-];
+// Real data state management
+interface AdminStats {
+  pendingItems: number;
+  flaggedItems: number;
+  activeUsers: number;
+  totalItems: number;
+  totalUsers: number;
+  soldItems: number;
+  revenue: number;
+  activeItems: number;
+  approvedItems: number;
+  rejectedItems: number;
+}
 
 const AdminPanel = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [pendingItems, setPendingItems] = useState<Item[]>(mockPendingItems);
-  const [flaggedItems, setFlaggedItems] = useState<Item[]>(mockFlaggedItems);
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [pendingItems, setPendingItems] = useState<Item[]>([]);
+  const [flaggedItems, setFlaggedItems] = useState<Item[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [loading, setLoading] = useState({
+    pending: false,
+    flagged: false,
+    users: false,
+    stats: false,
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [customPoints, setCustomPoints] = useState("");
