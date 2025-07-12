@@ -523,19 +523,24 @@ export function createServer() {
     ).length;
     const soldItems = mockItems.filter((item) => item.status === "sold").length;
 
+    // Add some realistic historical data
+    const totalHistoricalItems = 847; // Total items processed over time
+    const totalHistoricalSold = 312; // Total sold items
+    const totalRevenue = 28540; // Total revenue in currency
+
     res.json({
       success: true,
       data: {
         pendingItems,
         flaggedItems,
         activeUsers: mockUsers.filter((u) => u.isActive).length,
-        totalItems: mockItems.length,
-        totalUsers: mockUsers.length,
-        soldItems,
-        revenue: 0,
-        activeItems: approvedItems,
-        approvedItems,
-        rejectedItems,
+        totalItems: totalHistoricalItems + mockItems.length,
+        totalUsers: mockUsers.length + 1247, // Add some historical users
+        soldItems: totalHistoricalSold + soldItems,
+        revenue: totalRevenue,
+        activeItems: approvedItems + 156, // Add historical active items
+        approvedItems: approvedItems + 425, // Add historical approved items
+        rejectedItems: rejectedItems + 67, // Add historical rejected items
       },
     });
   });
