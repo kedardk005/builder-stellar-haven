@@ -319,8 +319,17 @@ const Browse = () => {
                   >
                     <CardContent className="p-0">
                       <div className="relative">
-                        <div className="aspect-square bg-muted rounded-t-lg">
-                          {/* Placeholder for item image */}
+                        <div className="aspect-square bg-muted rounded-t-lg flex items-center justify-center">
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="w-full h-full object-cover rounded-t-lg"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              e.currentTarget.parentElement!.innerHTML =
+                                '<div class="w-full h-full flex items-center justify-center text-text-muted"><span class="text-sm">No Image</span></div>';
+                            }}
+                          />
                         </div>
                         <Button
                           variant="ghost"
@@ -404,7 +413,18 @@ const Browse = () => {
                   >
                     <CardContent className="p-6">
                       <div className="flex gap-4">
-                        <div className="w-24 h-24 bg-muted rounded-lg flex-shrink-0"></div>
+                        <div className="w-24 h-24 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              e.currentTarget.parentElement!.innerHTML =
+                                '<div class="w-full h-full flex items-center justify-center text-text-muted text-xs">No Image</div>';
+                            }}
+                          />
+                        </div>
                         <div className="flex-1 space-y-2">
                           <div className="flex items-start justify-between">
                             <div>
