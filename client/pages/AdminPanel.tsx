@@ -132,7 +132,7 @@ interface AdminStats {
 }
 
 const AdminPanel = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [pendingItems, setPendingItems] = useState<Item[]>([]);
   const [flaggedItems, setFlaggedItems] = useState<Item[]>([]);
