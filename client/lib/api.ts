@@ -251,4 +251,14 @@ export const ordersApi = {
   cancelOrder: (id: string) => api.put(`/api/orders/${id}/cancel`),
 };
 
+// Auth API functions
+export const authApi = {
+  updateProfile: (data: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    bio?: string;
+  }) => api.put("/api/auth/profile", data),
+};
+
 export { ApiError };
