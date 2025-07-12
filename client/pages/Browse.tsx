@@ -33,6 +33,10 @@ import {
   Sparkles,
   Loader2,
   AlertCircle,
+  ArrowRightLeft,
+  Coins,
+  CreditCard,
+  Gift,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
