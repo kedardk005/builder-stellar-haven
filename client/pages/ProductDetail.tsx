@@ -26,7 +26,7 @@ import {
   Loader2,
   AlertCircle,
   ShoppingCart,
-  Exchange,
+  ArrowLeftRight,
   Eye,
   Flag,
 } from "lucide-react";
@@ -582,7 +582,7 @@ const ProductDetail = () => {
                       variant="outline"
                       disabled={product.seller._id === user?.id}
                     >
-                      <Exchange className="h-4 w-4 mr-2" />
+                      <ArrowLeftRight className="h-4 w-4 mr-2" />
                       Exchange
                     </Button>
                   </div>
