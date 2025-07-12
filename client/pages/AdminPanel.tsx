@@ -558,11 +558,19 @@ const AdminPanel = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="pending">Pending Approvals</TabsTrigger>
-            <TabsTrigger value="quality">Quality Control</TabsTrigger>
-            <TabsTrigger value="rewards">Points & Rewards</TabsTrigger>
-            <TabsTrigger value="moderation">Content Moderation</TabsTrigger>
+          <TabsList
+            className={`grid w-full ${isAdmin ? "grid-cols-4" : "grid-cols-1"}`}
+          >
+            <TabsTrigger value="pending">
+              {isAdmin ? "Pending Approvals" : "My Items"}
+            </TabsTrigger>
+            {isAdmin && (
+              <>
+                <TabsTrigger value="quality">Quality Control</TabsTrigger>
+                <TabsTrigger value="rewards">Points & Rewards</TabsTrigger>
+                <TabsTrigger value="moderation">Content Moderation</TabsTrigger>
+              </>
+            )}
           </TabsList>
 
           {/* Pending Approvals Tab */}
