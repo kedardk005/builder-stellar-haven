@@ -51,6 +51,8 @@ interface Item {
   condition: string;
   price: number;
   originalPrice?: number;
+  pointsValue: number; // Points needed to redeem this item
+  swapValue: number; // Value for swap calculations
   images: Array<{ url: string; isPrimary: boolean }>;
   seller: {
     _id: string;
@@ -68,7 +70,9 @@ interface Item {
   createdAt: string;
   tags?: string[];
   isLiked?: boolean;
-  points?: number;
+  swapEnabled: boolean; // Whether this item accepts swaps
+  pointsEnabled: boolean; // Whether this item can be redeemed with points
+  purchaseEnabled: boolean; // Whether this item can be purchased with INR
 }
 
 interface ApiResponse {
