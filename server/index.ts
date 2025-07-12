@@ -380,15 +380,15 @@ export function createServer() {
 
     mockItems.push(newItem);
 
-    // Award points for listing an item
+    // Award points for listing an item (as per specification: +1 point)
     if (req.user) {
-      req.user.points += 10;
+      req.user.points += 1;
     }
 
     res.status(201).json({
       success: true,
       message:
-        "Item created successfully. It will be reviewed before going live.",
+        "Item created successfully. It will be reviewed before going live. You earned +1 point!",
       data: newItem,
     });
   });
